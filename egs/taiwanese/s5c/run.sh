@@ -3,64 +3,47 @@
 . cmd.sh
 . path.sh
 
-# This setup was modified from egs/swbd/s5b, with the following changes:
-# 1. added more training data for early stages
-# 2. removed SAT system (and later stages) on the 100k utterance training data
-# 3. reduced number of LM rescoring, only sw1_tg and sw1_fsh_fg remain
-# 4. mapped swbd transcription to fisher style, instead of the other way around
+# This setup was modified from egs/swbd/s5c, with the following changes:
 
 set -e # exit on error
-has_fisher=true
-local/swbd1_data_download.sh /export/corpora3/LDC/LDC97S62
-# local/swbd1_data_download.sh /mnt/matylda2/data/SWITCHBOARD_1R2 # BUT,
+has_fisher=false
+# get corpus by 匯出Kaldi 格式資料
+for x in data/train/*; do
+    sort $x -o $x
+done
+utils/utt2spk_to_spk2utt.pl data/train/utt2spk > data/train/spk2utt
 
-# prepare SWBD dictionary first since we want to find acronyms according to pronunciations
-# before mapping lexicon and transcripts
-local/swbd1_prepare_dict.sh
 
-# Prepare Switchboard data. This command can also take a second optional argument
-# which specifies the directory to Switchboard documentations. Specifically, if
-# this argument is given, the script will look for the conv.tab file and correct
-# speaker IDs to the actual speaker personal identification numbers released in
-# the documentations. The documentations can be found here:
-# https://catalog.ldc.upenn.edu/docs/LDC97S62/
-# Note: if you are using this link, make sure you rename conv_tab.csv to conv.tab
-# after downloading.
-# Usage: local/swbd1_data_prep.sh /path/to/SWBD [/path/to/SWBD_docs]
-local/swbd1_data_prep.sh /export/corpora3/LDC/LDC97S62
-# local/swbd1_data_prep.sh /home/dpovey/data/LDC97S62
-# local/swbd1_data_prep.sh /data/corpora0/LDC97S62
-# local/swbd1_data_prep.sh /mnt/matylda2/data/SWITCHBOARD_1R2 # BUT,
-# local/swbd1_data_prep.sh /exports/work/inf_hcrc_cstr_general/corpora/switchboard/switchboard1
 
-utils/prepare_lang.sh data/local/dict_nosp \
-  "<unk>"  data/local/lang_nosp data/lang_nosp
 
-# Now train the language models. We are using SRILM and interpolating with an
-# LM trained on the Fisher transcripts (part 2 disk is currently missing; so
-# only part 1 transcripts ~700hr are used)
+# utils/prepare_lang.sh data/local/dict_nosp \
+#   "<unk>"  data/local/lang_nosp data/lang_nosp
 
-# If you have the Fisher data, you can set this "fisher_dir" variable.
-fisher_dirs="/export/corpora3/LDC/LDC2004T19/fe_03_p1_tran/ /export/corpora3/LDC/LDC2005T19/fe_03_p2_tran/"
-# fisher_dirs="/home/dpovey/data/LDC2004T19/fe_03_p1_tran/"
-# fisher_dirs="/data/corpora0/LDC2004T19/fe_03_p1_tran/"
-# fisher_dirs="/exports/work/inf_hcrc_cstr_general/corpora/fisher/transcripts" # Edinburgh,
-# fisher_dirs="/mnt/matylda2/data/FISHER/fe_03_p1_tran /mnt/matylda2/data/FISHER/fe_03_p2_tran" # BUT,
-local/swbd1_train_lms.sh data/local/train/text \
-  data/local/dict_nosp/lexicon.txt data/local/lm $fisher_dirs
+# # Now train the language models. We are using SRILM and interpolating with an
+# # LM trained on the Fisher transcripts (part 2 disk is currently missing; so
+# # only part 1 transcripts ~700hr are used)
 
-# Compiles G for swbd trigram LM
-LM=data/local/lm/sw1.o3g.kn.gz
-srilm_opts="-subset -prune-lowprobs -unk -tolower -order 3"
-utils/format_lm_sri.sh --srilm-opts "$srilm_opts" \
-  data/lang_nosp $LM data/local/dict_nosp/lexicon.txt data/lang_nosp_sw1_tg
+# # If you have the Fisher data, you can set this "fisher_dir" variable.
+# fisher_dirs="/export/corpora3/LDC/LDC2004T19/fe_03_p1_tran/ /export/corpora3/LDC/LDC2005T19/fe_03_p2_tran/"
+# # fisher_dirs="/home/dpovey/data/LDC2004T19/fe_03_p1_tran/"
+# # fisher_dirs="/data/corpora0/LDC2004T19/fe_03_p1_tran/"
+# # fisher_dirs="/exports/work/inf_hcrc_cstr_general/corpora/fisher/transcripts" # Edinburgh,
+# # fisher_dirs="/mnt/matylda2/data/FISHER/fe_03_p1_tran /mnt/matylda2/data/FISHER/fe_03_p2_tran" # BUT,
+# local/swbd1_train_lms.sh data/local/train/text \
+#   data/local/dict_nosp/lexicon.txt data/local/lm $fisher_dirs
 
-# Compiles const G for swbd+fisher 4gram LM, if it exists.
-LM=data/local/lm/sw1_fsh.o4g.kn.gz
-[ -f $LM ] || has_fisher=false
-if $has_fisher; then
-  utils/build_const_arpa_lm.sh $LM data/lang_nosp data/lang_nosp_sw1_fsh_fg
-fi
+# # Compiles G for swbd trigram LM
+# LM=data/local/lm/sw1.o3g.kn.gz
+# srilm_opts="-subset -prune-lowprobs -unk -tolower -order 3"
+# utils/format_lm_sri.sh --srilm-opts "$srilm_opts" \
+#   data/lang_nosp $LM data/local/dict_nosp/lexicon.txt data/lang_nosp_sw1_tg
+
+# # Compiles const G for swbd+fisher 4gram LM, if it exists.
+# LM=data/local/lm/sw1_fsh.o4g.kn.gz
+# [ -f $LM ] || has_fisher=false
+# if $has_fisher; then
+#   utils/build_const_arpa_lm.sh $LM data/lang_nosp data/lang_nosp_sw1_fsh_fg
+# fi
 
 # Data preparation and formatting for eval2000 (note: the "text" file
 # is not very much preprocessed; for actual WER reporting we'll use
@@ -70,16 +53,17 @@ fi
 # local/eval2000_data_prep.sh /mnt/matylda2/data/HUB5_2000/ /mnt/matylda2/data/HUB5_2000/2000_hub5_eng_eval_tr
 # local/eval2000_data_prep.sh /exports/work/inf_hcrc_cstr_general/corpora/switchboard/hub5/2000 /exports/work/inf_hcrc_cstr_general/corpora/switchboard/hub5/2000/transcr
 # local/eval2000_data_prep.sh /home/dpovey/data/LDC2002S09/hub5e_00 /home/dpovey/data/LDC2002T43
-local/eval2000_data_prep.sh /export/corpora2/LDC/LDC2002S09/hub5e_00 /export/corpora2/LDC/LDC2002T43
+#### local/eval2000_data_prep.sh /export/corpora2/LDC/LDC2002S09/hub5e_00 /export/corpora2/LDC/LDC2002T43
 
 # Now make MFCC features.
 # mfccdir should be some place with a largish disk where you
 # want to store MFCC features.
 mfccdir=mfcc
-for x in train eval2000; do
-  steps/make_mfcc.sh --nj 50 --cmd "$train_cmd" \
-    data/$x exp/make_mfcc/$x $mfccdir
+for x in train; do
+  steps/make_mfcc.sh --nj 20 --cmd "$train_cmd" \
+   data/$x exp/make_mfcc/$x $mfccdir
   steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir
+#  utils/validate_data_dir.sh data/$x
   utils/fix_data_dir.sh data/$x
 done
 
