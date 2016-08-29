@@ -13,13 +13,12 @@ for x in data/train/*; do
 done
 utils/utt2spk_to_spk2utt.pl data/train/utt2spk > data/train/spk2utt
 
-utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
-
 # # Now train the language models.
 
 # # Compiles G for trigram LM
 # LM=data/local/lm/sw1.o3g.kn.gz
-LM='data/lang/lm.arpa'
+LM='data/lang/語言模型.lm'
+mkdir -p data/test
 cat $LM | utils/find_arpa_oovs.pl data/lang/words.txt  > data/lang/oov.txt
 cat $LM | \
     grep -v '<s> <s>' | \
@@ -31,17 +30,19 @@ cat $LM | \
       --osymbols=data/lang/words.txt  --keep_isymbols=false --keep_osymbols=false | \
      fstrmepsilon > data/test/G.fst
 
+
+utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
 # Now make MFCC features.
 # mfccdir should be some place with a largish disk where you
 # want to store MFCC features.
 mfccdir=mfcc
-for x in train; do
-  steps/make_mfcc.sh --nj 20 --cmd "$train_cmd" \
-   data/$x exp/make_mfcc/$x $mfccdir
-  steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir
-#  utils/validate_data_dir.sh data/$x
-  utils/fix_data_dir.sh data/$x
-done
+# for x in train; do
+#   steps/make_mfcc.sh --nj 20 --cmd "$train_cmd" \
+#    data/$x exp/make_mfcc/$x $mfccdir
+#   steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir
+# #  utils/validate_data_dir.sh data/$x
+#   utils/fix_data_dir.sh data/$x
+# done
 
 # Use the first 4k sentences as dev set.  Note: when we trained the LM, we used
 # the 1st 10k sentences as dev set, so the 1st 4k won't have been used in the
@@ -67,64 +68,64 @@ utils/data/remove_dup_utts.sh 200 data/train_100k data/train_100k_nodup  # 110hr
 utils/data/remove_dup_utts.sh 300 data/train_nodev data/train_nodup  # 286hr
 ## Starting basic training on MFCC features
 steps/train_mono.sh --nj 30 --cmd "$train_cmd" \
-  data/train_30kshort data/lang_nosp exp/mono
+  data/train_30kshort data/lang exp/mono
 
 steps/align_si.sh --nj 30 --cmd "$train_cmd" \
-  data/train_100k_nodup data/lang_nosp exp/mono exp/mono_ali
+  data/train_100k_nodup data/lang exp/mono exp/mono_ali
 
 steps/train_deltas.sh --cmd "$train_cmd" \
-  3200 30000 data/train_100k_nodup data/lang_nosp exp/mono_ali exp/tri1
+  3200 30000 data/train_100k_nodup data/lang exp/mono_ali exp/tri1
 
 (
   graph_dir=exp/tri1/graph_nosp_sw1_tg
   $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh data/lang_nosp_sw1_tg exp/tri1 $graph_dir
+    utils/mkgraph.sh data/lang_sw1_tg exp/tri1 $graph_dir
   steps/decode_si.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
     $graph_dir data/eval2000 exp/tri1/decode_eval2000_nosp_sw1_tg
 ) &
 
 steps/align_si.sh --nj 30 --cmd "$train_cmd" \
-  data/train_100k_nodup data/lang_nosp exp/tri1 exp/tri1_ali
+  data/train_100k_nodup data/lang exp/tri1 exp/tri1_ali
 
 steps/train_deltas.sh --cmd "$train_cmd" \
-  4000 70000 data/train_100k_nodup data/lang_nosp exp/tri1_ali exp/tri2
+  4000 70000 data/train_100k_nodup data/lang exp/tri1_ali exp/tri2
 
 (
   # The previous mkgraph might be writing to this file.  If the previous mkgraph
   # is not running, you can remove this loop and this mkgraph will create it.
-  while [ ! -s data/lang_nosp_sw1_tg/tmp/CLG_3_1.fst ]; do sleep 60; done
+  while [ ! -s data/lang_sw1_tg/tmp/CLG_3_1.fst ]; do sleep 60; done
   sleep 20; # in case still writing.
   graph_dir=exp/tri2/graph_nosp_sw1_tg
   $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh data/lang_nosp_sw1_tg exp/tri2 $graph_dir
+    utils/mkgraph.sh data/lang_sw1_tg exp/tri2 $graph_dir
   steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
     $graph_dir data/eval2000 exp/tri2/decode_eval2000_nosp_sw1_tg
 ) &
 
 # The 100k_nodup data is used in neural net training.
 steps/align_si.sh --nj 30 --cmd "$train_cmd" \
-  data/train_100k_nodup data/lang_nosp exp/tri2 exp/tri2_ali_100k_nodup
+  data/train_100k_nodup data/lang exp/tri2 exp/tri2_ali_100k_nodup
 
 # From now, we start using all of the data (except some duplicates of common
 # utterances, which don't really contribute much).
 steps/align_si.sh --nj 30 --cmd "$train_cmd" \
-  data/train_nodup data/lang_nosp exp/tri2 exp/tri2_ali_nodup
+  data/train_nodup data/lang exp/tri2 exp/tri2_ali_nodup
 
 # Do another iteration of LDA+MLLT training, on all the data.
 steps/train_lda_mllt.sh --cmd "$train_cmd" \
-  6000 140000 data/train_nodup data/lang_nosp exp/tri2_ali_nodup exp/tri3
+  6000 140000 data/train_nodup data/lang exp/tri2_ali_nodup exp/tri3
 
 (
   graph_dir=exp/tri3/graph_nosp_sw1_tg
   $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh data/lang_nosp_sw1_tg exp/tri3 $graph_dir
+    utils/mkgraph.sh data/lang_sw1_tg exp/tri3 $graph_dir
   steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
     $graph_dir data/eval2000 exp/tri3/decode_eval2000_nosp_sw1_tg
 ) &
 
 # Now we compute the pronunciation and silence probabilities from training data,
 # and re-create the lang directory.
-steps/get_prons.sh --cmd "$train_cmd" data/train_nodup data/lang_nosp exp/tri3
+steps/get_prons.sh --cmd "$train_cmd" data/train_nodup data/lang exp/tri3
 utils/dict_dir_add_pronprobs.sh --max-normalize true \
   data/local/dict_nosp exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
   exp/tri3/pron_bigram_counts_nowb.txt data/local/dict
@@ -168,12 +169,6 @@ steps/train_sat.sh  --cmd "$train_cmd" \
 ) &
 wait
 
-if $has_fisher; then
-  steps/lmrescore_const_arpa.sh --cmd "$decode_cmd" \
-    data/lang_sw1_{tg,fsh_fg} data/eval2000 \
-    exp/tri4/decode_eval2000_sw1_{tg,fsh_fg}
-fi
-
 # MMI training starting from the LDA+MLLT+SAT systems on all the (nodup) data.
 steps/align_fmllr.sh --nj 50 --cmd "$train_cmd" \
   data/train_nodup data/lang exp/tri4 exp/tri4_ali_nodup
@@ -202,15 +197,6 @@ for iter in 1 2 3 4; do
 done
 wait
 
-if $has_fisher; then
-  for iter in 1 2 3 4;do
-    (
-      steps/lmrescore_const_arpa.sh --cmd "$decode_cmd" \
-        data/lang_sw1_{tg,fsh_fg} data/eval2000 \
-        exp/tri4_mmi_b0.1/decode_eval2000_${iter}.mdl_sw1_{tg,fsh_fg}
-    ) &
-  done
-fi
 
 # Now do fMMI+MMI training
 steps/train_diag_ubm.sh --silence-weight 0.5 --nj 50 --cmd "$train_cmd" \
@@ -231,16 +217,6 @@ for iter in 4 5 6 7 8; do
   ) &
 done
 wait
-
-if $has_fisher; then
-  for iter in 4 5 6 7 8; do
-    (
-      steps/lmrescore_const_arpa.sh --cmd "$decode_cmd" \
-        data/lang_sw1_{tg,fsh_fg} data/eval2000 \
-        exp/tri4_fmmi_b0.1/decode_eval2000_it${iter}_sw1_{tg,fsh_fg}
-    ) &
-  done
-fi
 
 # this will help find issues with the lexicon.
 # steps/cleanup/debug_lexicon.sh --nj 300 --cmd "$train_cmd" data/train_nodev data/lang exp/tri4 data/local/dict/lexicon.txt exp/debug_lexicon
