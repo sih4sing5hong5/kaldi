@@ -13,20 +13,23 @@ for x in data/train/*; do
 done
 utils/utt2spk_to_spk2utt.pl data/train/utt2spk > data/train/spk2utt
 
-
-
-
 utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
 
-# # Now train the language models. We are using SRILM and interpolating with an
-# # LM trained on the Fisher transcripts (part 2 disk is currently missing; so
-# # only part 1 transcripts ~700hr are used)
+# # Now train the language models.
 
-# # Compiles G for swbd trigram LM
+# # Compiles G for trigram LM
 # LM=data/local/lm/sw1.o3g.kn.gz
-# srilm_opts="-subset -prune-lowprobs -unk -tolower -order 3"
-# utils/format_lm_sri.sh --srilm-opts "$srilm_opts" \
-#   data/lang_nosp $LM data/local/dict_nosp/lexicon.txt data/lang_nosp_sw1_tg
+LM='data/lang/lm.arpa'
+cat $LM | utils/find_arpa_oovs.pl data/lang/words.txt  > data/lang/oov.txt
+cat $LM | \
+    grep -v '<s> <s>' | \
+    grep -v '</s> <s>' | \
+    grep -v '</s> </s>' | \
+    arpa2fst - | fstprint | \
+    utils/remove_oovs.pl data/lang/oov.txt | \
+    utils/eps2disambig.pl | utils/s2eps.pl | fstcompile --isymbols=data/lang/words.txt \
+      --osymbols=data/lang/words.txt  --keep_isymbols=false --keep_osymbols=false | \
+     fstrmepsilon > data/test/G.fst
 
 # Now make MFCC features.
 # mfccdir should be some place with a largish disk where you
