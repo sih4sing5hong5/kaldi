@@ -36,13 +36,13 @@ utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
 # mfccdir should be some place with a largish disk where you
 # want to store MFCC features.
 mfccdir=mfcc
-# for x in train; do
-#   steps/make_mfcc.sh --nj 20 --cmd "$train_cmd" \
-#    data/$x exp/make_mfcc/$x $mfccdir
-#   steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir
-# #  utils/validate_data_dir.sh data/$x
-#   utils/fix_data_dir.sh data/$x
-# done
+for x in train; do
+  steps/make_mfcc.sh --nj 20 --cmd "$train_cmd" \
+   data/$x exp/make_mfcc/$x $mfccdir
+  steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir
+#  utils/validate_data_dir.sh data/$x
+  utils/fix_data_dir.sh data/$x
+done
 
 # Use the first 4k sentences as dev set.  Note: when we trained the LM, we used
 # the 1st 10k sentences as dev set, so the 1st 4k won't have been used in the
