@@ -28,7 +28,7 @@ cat $LM | \
     utils/remove_oovs.pl data/lang/oov.txt | \
     utils/eps2disambig.pl | utils/s2eps.pl | fstcompile --isymbols=data/lang/words.txt \
       --osymbols=data/lang/words.txt  --keep_isymbols=false --keep_osymbols=false | \
-     fstrmepsilon > data/test/G.fst
+     fstrmepsilon > data/lang/G.fst
 
 
 utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
