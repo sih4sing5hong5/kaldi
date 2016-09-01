@@ -79,7 +79,7 @@ steps/train_deltas.sh --cmd "$train_cmd" \
 (
   graph_dir=exp/tri1/graph_nosp_sw1_tg
   $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh data/lang_sw1_tg exp/tri1 $graph_dir
+    utils/mkgraph.sh data/lang exp/tri1 $graph_dir
   steps/decode_si.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
     $graph_dir data/eval2000 exp/tri1/decode_eval2000_nosp_sw1_tg
 ) &
@@ -93,11 +93,11 @@ steps/train_deltas.sh --cmd "$train_cmd" \
 (
   # The previous mkgraph might be writing to this file.  If the previous mkgraph
   # is not running, you can remove this loop and this mkgraph will create it.
-  while [ ! -s data/lang_sw1_tg/tmp/CLG_3_1.fst ]; do sleep 60; done
+  while [ ! -s data/lang/tmp/CLG_3_1.fst ]; do sleep 60; done
   sleep 20; # in case still writing.
   graph_dir=exp/tri2/graph_nosp_sw1_tg
   $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh data/lang_sw1_tg exp/tri2 $graph_dir
+    utils/mkgraph.sh data/lang exp/tri2 $graph_dir
   steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
     $graph_dir data/eval2000 exp/tri2/decode_eval2000_nosp_sw1_tg
 ) &
@@ -118,7 +118,7 @@ steps/train_lda_mllt.sh --cmd "$train_cmd" \
 (
   graph_dir=exp/tri3/graph_nosp_sw1_tg
   $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh data/lang_sw1_tg exp/tri3 $graph_dir
+    utils/mkgraph.sh data/lang exp/tri3 $graph_dir
   steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
     $graph_dir data/eval2000 exp/tri3/decode_eval2000_nosp_sw1_tg
 ) &
@@ -130,20 +130,10 @@ utils/dict_dir_add_pronprobs.sh --max-normalize true \
   data/local/dict_nosp exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
   exp/tri3/pron_bigram_counts_nowb.txt data/local/dict
 
-utils/prepare_lang.sh data/local/dict "<unk>" data/local/lang data/lang
-LM=data/local/lm/sw1.o3g.kn.gz
-srilm_opts="-subset -prune-lowprobs -unk -tolower -order 3"
-utils/format_lm_sri.sh --srilm-opts "$srilm_opts" \
-  data/lang $LM data/local/dict/lexicon.txt data/lang_sw1_tg
-LM=data/local/lm/sw1_fsh.o4g.kn.gz
-if $has_fisher; then
-  utils/build_const_arpa_lm.sh $LM data/lang data/lang_sw1_fsh_fg
-fi
-
 (
   graph_dir=exp/tri3/graph_sw1_tg
   $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh data/lang_sw1_tg exp/tri3 $graph_dir
+    utils/mkgraph.sh data/lang exp/tri3 $graph_dir
   steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
     $graph_dir data/eval2000 exp/tri3/decode_eval2000_sw1_tg
 ) &
@@ -159,7 +149,7 @@ steps/train_sat.sh  --cmd "$train_cmd" \
 (
   graph_dir=exp/tri4/graph_sw1_tg
   $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh data/lang_sw1_tg exp/tri4 $graph_dir
+    utils/mkgraph.sh data/lang exp/tri4 $graph_dir
   steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
     --config conf/decode.config \
     $graph_dir data/eval2000 exp/tri4/decode_eval2000_sw1_tg
