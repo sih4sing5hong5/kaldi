@@ -81,7 +81,7 @@ steps/train_deltas.sh --cmd "$train_cmd" \
   $train_cmd $graph_dir/mkgraph.log \
     utils/mkgraph.sh data/lang exp/tri1 $graph_dir
   steps/decode_si.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
-    $graph_dir data/eval2000 exp/tri1/decode_eval2000_nosp_sw1_tg
+    $graph_dir data/train_dev exp/tri1/decode_train_dev
 ) &
 
 steps/align_si.sh --nj 30 --cmd "$train_cmd" \
@@ -99,7 +99,7 @@ steps/train_deltas.sh --cmd "$train_cmd" \
   $train_cmd $graph_dir/mkgraph.log \
     utils/mkgraph.sh data/lang exp/tri2 $graph_dir
   steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
-    $graph_dir data/eval2000 exp/tri2/decode_eval2000_nosp_sw1_tg
+    $graph_dir data/train_dev exp/tri2/decode_train_dev
 ) &
 
 # The 100k_nodup data is used in neural net training.
@@ -120,13 +120,13 @@ steps/train_lda_mllt.sh --cmd "$train_cmd" \
   $train_cmd $graph_dir/mkgraph.log \
     utils/mkgraph.sh data/lang exp/tri3 $graph_dir
   steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
-    $graph_dir data/eval2000 exp/tri3/decode_eval2000_nosp_sw1_tg
+    $graph_dir data/train_dev exp/tri3/decode_train_dev
 ) &
 
 # Now we compute the pronunciation and silence probabilities from training data,
 # and re-create the lang directory.
 steps/get_prons.sh --cmd "$train_cmd" data/train_nodup data/lang exp/tri3
-# utils/dict_dir_add_pronprobs.sh --max-normalize true \
+# utils/dict_dir_add_pronprobs.sh --max-normalize true \ff
 #   data/local/dict_nosp exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
 #   exp/tri3/pron_bigram_counts_nowb.txt data/local/dict
 
@@ -135,7 +135,7 @@ steps/get_prons.sh --cmd "$train_cmd" data/train_nodup data/lang exp/tri3
   $train_cmd $graph_dir/mkgraph.log \
     utils/mkgraph.sh data/lang exp/tri3 $graph_dir
   steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
-    $graph_dir data/eval2000 exp/tri3/decode_eval2000_sw1_tg
+    $graph_dir data/train_dev exp/tri3/decode_train_dev
 ) &
 
 # Train tri4, which is LDA+MLLT+SAT, on all the (nodup) data.
@@ -152,10 +152,10 @@ steps/train_sat.sh  --cmd "$train_cmd" \
     utils/mkgraph.sh data/lang exp/tri4 $graph_dir
   steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
     --config conf/decode.config \
-    $graph_dir data/eval2000 exp/tri4/decode_eval2000_sw1_tg
+    $graph_dir data/train_dev exp/tri4/decode_train_dev
   # Will be used for confidence calibration example,
-  steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
-    $graph_dir data/train_dev exp/tri4/decode_dev_sw1_tg
+  # steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
+  #   $graph_dir data/train_dev exp/tri4/decode_dev_sw1_tg
 ) &
 wait
 
@@ -178,11 +178,11 @@ steps/train_mmi.sh --cmd "$decode_cmd" \
 for iter in 1 2 3 4; do
   (
     graph_dir=exp/tri4/graph_sw1_tg
-    decode_dir=exp/tri4_mmi_b0.1/decode_eval2000_${iter}.mdl_sw1_tg
+    decode_dir=exp/tri4_mmi_b0.1/decode_train_dev_${iter}.mdl_sw1_tg
     steps/decode.sh --nj 30 --cmd "$decode_cmd" \
       --config conf/decode.config --iter $iter \
-      --transform-dir exp/tri4/decode_eval2000_sw1_tg \
-      $graph_dir data/eval2000 $decode_dir
+      --transform-dir exp/tri4/decode_train_dev \
+      $graph_dir data/train_dev $decode_dir
   ) &
 done
 wait
@@ -200,10 +200,10 @@ steps/train_mmi_fmmi.sh --learning-rate 0.005 \
 for iter in 4 5 6 7 8; do
   (
     graph_dir=exp/tri4/graph_sw1_tg
-    decode_dir=exp/tri4_fmmi_b0.1/decode_eval2000_it${iter}_sw1_tg
+    decode_dir=exp/tri4_fmmi_b0.1/decode_train_dev_it${iter}_sw1_tg
     steps/decode_fmmi.sh --nj 30 --cmd "$decode_cmd" --iter $iter \
-      --transform-dir exp/tri4/decode_eval2000_sw1_tg \
-      --config conf/decode.config $graph_dir data/eval2000 $decode_dir
+      --transform-dir exp/tri4/decode_train_dev \
+      --config conf/decode.config $graph_dir data/train_dev $decode_dir
   ) &
 done
 wait
@@ -243,4 +243,4 @@ wait
 #                         --chunk-right-context 40
 
 # getting results (see RESULTS file)
-# for x in 1 2 3a 3b 4a; do grep 'Percent Total Error' exp/tri$x/decode_eval2000_sw1_tg/score_*/eval2000.ctm.filt.dtl | sort -k5 -g | head -1; done
+# for x in 1 2 3a 3b 4a; do grep 'Percent Total Error' exp/tri$x/decode_train_dev/score_*/eval2000.ctm.filt.dtl | sort -k5 -g | head -1; done
