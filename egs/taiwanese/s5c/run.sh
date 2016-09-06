@@ -126,9 +126,9 @@ steps/train_lda_mllt.sh --cmd "$train_cmd" \
 # Now we compute the pronunciation and silence probabilities from training data,
 # and re-create the lang directory.
 steps/get_prons.sh --cmd "$train_cmd" data/train_nodup data/lang exp/tri3
-utils/dict_dir_add_pronprobs.sh --max-normalize true \
-  data/local/dict_nosp exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
-  exp/tri3/pron_bigram_counts_nowb.txt data/local/dict
+# utils/dict_dir_add_pronprobs.sh --max-normalize true \
+#   data/local/dict_nosp exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
+#   exp/tri3/pron_bigram_counts_nowb.txt data/local/dict
 
 (
   graph_dir=exp/tri3/graph_sw1_tg
