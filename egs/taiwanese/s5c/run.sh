@@ -11,24 +11,24 @@ set -e # exit on error
 
 utils/utt2spk_to_spk2utt.pl data/train/utt2spk > data/train/spk2utt
 
+utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
+
 # # Now train the language models.
 
 # # Compiles G for trigram LM
 # LM=data/local/lm/sw1.o3g.kn.gz
 LM='data/lang/語言模型.lm'
 
-cat $LM | utils/find_arpa_oovs.pl data/lang/words.txt  > data/lang/oov.txt
+cat $LM | utils/find_arpa_oovs.pl data/lang/words.txt  > data/lang/arpa_oov.txt
 cat $LM | \
     grep -v '<s> <s>' | \
     grep -v '</s> <s>' | \
     grep -v '</s> </s>' | \
     arpa2fst - | fstprint | \
-    utils/remove_oovs.pl data/lang/oov.txt | \
+    utils/remove_oovs.pl data/lang/arpa_oov.txt | \
     utils/eps2disambig.pl | utils/s2eps.pl | fstcompile --isymbols=data/lang/words.txt \
       --osymbols=data/lang/words.txt  --keep_isymbols=false --keep_osymbols=false | \
      fstrmepsilon | fstarcsort > data/lang/G.fst
-
-utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
 
 # Now make MFCC features.
 # mfccdir should be some place with a largish disk where you
