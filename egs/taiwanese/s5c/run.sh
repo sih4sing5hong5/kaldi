@@ -6,21 +6,17 @@
 # This setup was modified from egs/swbd/s5c, with the following changes:
 
 set -e # exit on error
-has_fisher=false
-# get corpus by 匯出Kaldi 格式資料
-for x in data/train/*; do
-    sort $x -o $x
-done
-utils/utt2spk_to_spk2utt.pl data/train/utt2spk > data/train/spk2utt
 
-utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
+# get corpus by 匯出Kaldi 格式資料
+
+utils/utt2spk_to_spk2utt.pl data/train/utt2spk > data/train/spk2utt
 
 # # Now train the language models.
 
 # # Compiles G for trigram LM
 # LM=data/local/lm/sw1.o3g.kn.gz
 LM='data/lang/語言模型.lm'
-mkdir -p data/test
+
 cat $LM | utils/find_arpa_oovs.pl data/lang/words.txt  > data/lang/oov.txt
 cat $LM | \
     grep -v '<s> <s>' | \
@@ -30,7 +26,9 @@ cat $LM | \
     utils/remove_oovs.pl data/lang/oov.txt | \
     utils/eps2disambig.pl | utils/s2eps.pl | fstcompile --isymbols=data/lang/words.txt \
       --osymbols=data/lang/words.txt  --keep_isymbols=false --keep_osymbols=false | \
-     fstrmepsilon > data/lang/G.fst
+     fstrmepsilon | fstarcsort > data/lang/G.fst
+
+utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
 
 # Now make MFCC features.
 # mfccdir should be some place with a largish disk where you
@@ -210,6 +208,8 @@ wait
 
 # this will help find issues with the lexicon.
 # steps/cleanup/debug_lexicon.sh --nj 300 --cmd "$train_cmd" data/train_nodev data/lang exp/tri4 data/local/dict/lexicon.txt exp/debug_lexicon
+
+has_fisher=false
 
 # SGMM system.
 # local/run_sgmm2.sh $has_fisher
