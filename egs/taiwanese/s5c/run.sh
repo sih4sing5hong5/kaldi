@@ -7,19 +7,24 @@
 
 set -e # exit on error
 
-stage=0
+STAGE=0
+if [ -f ./stage.sh ]; then
+  # echo 'export STAGE=1' > stage.sh
+  . stage.sh
+fi
+echo "stage = $STAGE"
 
 # get corpus by 匯出Kaldi 格式資料
-if [ $stage -le 1 ]; then
+if [ $STAGE -le 1 ]; then
   utils/utt2spk_to_spk2utt.pl data/train/utt2spk > data/train/spk2utt
 fi
 
-if [ $stage -le 2 ]; then
+if [ $STAGE -le 2 ]; then
   utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
 fi
 
 # # Now train the language models.
-if [ $stage -le 3 ]; then
+if [ $STAGE -le 3 ]; then
   # # Compiles G for trigram LM
   LM='data/lang/語言模型.lm'
 
@@ -36,7 +41,7 @@ if [ $stage -le 3 ]; then
 fi
 
 # Now make MFCC features.
-if [ $stage -le 4 ]; then
+if [ $STAGE -le 4 ]; then
   # mfccdir should be some place with a largish disk where you
   # want to store MFCC features.
   mfccdir=mfcc
@@ -48,7 +53,7 @@ if [ $stage -le 4 ]; then
 fi
 
 # Split corpus for test and mono_train
-if [ $stage -le 5 ]; then
+if [ $STAGE -le 5 ]; then
   # Use the first 4k sentences as dev set.  Note: when we trained the LM, we used
   # the 1st 10k sentences as dev set, so the 1st 4k won't have been used in the
   # LM training data.   However, they will be in the lexicon, plus speakers
@@ -65,7 +70,7 @@ if [ $stage -le 5 ]; then
   utils/subset_data_dir.sh data/train_100kshort 30000 data/train_30kshort
 
   # Take the first 100k utterances (just under half the data); we'll use
-  # this for later stages of training.
+  # this for later STAGEs of training.
   utils/subset_data_dir.sh --first data/train_nodev 100000 data/train_100k
   utils/data/remove_dup_utts.sh 200 data/train_100k data/train_100k_nodup  # 110hr
 
@@ -74,12 +79,12 @@ if [ $stage -le 5 ]; then
 fi
 
 ## Starting basic training on MFCC features
-if [ $stage -le 10 ]; then
+if [ $STAGE -le 10 ]; then
   steps/train_mono.sh --nj 30 --cmd "$train_cmd" \
     data/train_30kshort data/lang exp/mono
 fi
 
-if [ $stage -le 11 ]; then
+if [ $STAGE -le 11 ]; then
   steps/align_si.sh --nj 30 --cmd "$train_cmd" \
     data/train_100k_nodup data/lang exp/mono exp/mono_ali
 
@@ -95,7 +100,7 @@ if [ $stage -le 11 ]; then
   ) &
 fi
 
-if [ $stage -le 12 ]; then
+if [ $STAGE -le 12 ]; then
   steps/align_si.sh --nj 30 --cmd "$train_cmd" \
     data/train_100k_nodup data/lang exp/tri1 exp/tri1_ali
 
@@ -117,7 +122,7 @@ fi
 
 # From now, we start using all of the data (except some duplicates of common
 # utterances, which don't really contribute much).
-if [ $stage -le 13 ]; then
+if [ $STAGE -le 13 ]; then
   steps/align_si.sh --nj 30 --cmd "$train_cmd" \
     data/train_nodup data/lang exp/tri2 exp/tri2_ali_nodup
 
@@ -136,7 +141,7 @@ fi
 
 # Now we compute the pronunciation and silence probabilities from training data,
 # and re-create the lang directory.
-if [ $stage -le 14 ]; then
+if [ $STAGE -le 14 ]; then
   steps/get_prons.sh --cmd "$train_cmd" data/train_nodup data/lang exp/tri3
   # utils/dict_dir_add_pronprobs.sh --max-normalize true \ff
   #   data/local/dict_nosp exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
@@ -152,7 +157,7 @@ if [ $stage -le 14 ]; then
 fi
 
 # Train tri4, which is LDA+MLLT+SAT, on all the (nodup) data.
-if [ $stage -le 15 ]; then
+if [ $STAGE -le 15 ]; then
   steps/align_fmllr.sh --nj 30 --cmd "$train_cmd" \
     data/train_nodup data/lang exp/tri3 exp/tri3_ali_nodup
 
@@ -174,7 +179,7 @@ if [ $stage -le 15 ]; then
 fi
 
 # MMI training starting from the LDA+MLLT+SAT systems on all the (nodup) data.
-if [ $stage -le 16 ]; then
+if [ $STAGE -le 16 ]; then
   steps/align_fmllr.sh --nj 50 --cmd "$train_cmd" \
     data/train_nodup data/lang exp/tri4 exp/tri4_ali_nodup
 
@@ -204,7 +209,7 @@ if [ $stage -le 16 ]; then
 fi
 
 # Now do fMMI+MMI training
-if [ $stage -le 17 ]; then
+if [ $STAGE -le 17 ]; then
   steps/train_diag_ubm.sh --silence-weight 0.5 --nj 50 --cmd "$train_cmd" \
     700 data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_dubm
 
@@ -230,7 +235,7 @@ fi
 
 has_fisher=false
 
-if [ $stage -le 30 ]; then
+if [ $STAGE -le 30 ]; then
   # The 100k_nodup data is used in neural net training.
   steps/align_si.sh --nj 30 --cmd "$train_cmd" \
     data/train_100k_nodup data/lang exp/tri2 exp/tri2_ali_100k_nodup
