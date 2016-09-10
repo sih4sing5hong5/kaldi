@@ -14,3 +14,9 @@ $train_cmd $graph_dir/mkgraph.log \
 steps/decode_si.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
   $graph_dir data/$test_dir exp/tri1/decode_test
 
+
+# getting results (see RESULTS file)
+for x in tri1 tri2 tri3 tri4 tri4_mmi_b0.1 tri4_fmmi_b0.1; do
+  echo "$x:"
+  cat exp/$x/decode_train_dev/wer_* | grep WER | sort -g | head -n 1
+done
