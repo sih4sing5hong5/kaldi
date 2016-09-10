@@ -230,19 +230,63 @@ if [ $STAGE -le 17 ]; then
   wait
 fi
 
+# SGMM2 Training & Decoding from timit
+if [[ $STAGE -le 18 ]]; then
+  # exp/tri3_ali +> tri4_ali_nodup
+  # exp/ubm4 => tri4_dubm
+  # sgmm2_4 => tri4_sgmm2
+  steps/train_sgmm2.sh --cmd "$train_cmd" $numLeavesSGMM $numGaussSGMM \
+   data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_dubm/final.ubm exp/tri4_sgmm2
+
+  (
+    graph_dir=exp/tri4_sgmm2/graph
+    utils/mkgraph.sh data/lang exp/tri4_sgmm2 $graph_dir
+
+    steps/decode_sgmm2.sh --nj "$decode_nj" --cmd "$decode_cmd"\
+     --transform-dir exp/tri4/decode_train_dev $graph_dir data/train_dev \
+     exp/tri4_sgmm2/decode_train_dev
+  ) #&
+fi
+
+# MMI + SGMM2 Training & Decoding from timit
+if [[ $STAGE -le 19 ]]; then
+  # exp/tri3_ali +> tri4_ali_nodup
+  # exp/ubm4 => tri4_dubm
+  # sgmm2_4 => tri4_sgmm2
+  steps/align_sgmm2.sh --nj "$train_nj" --cmd "$train_cmd" \
+   --transform-dir exp/tri4_ali_nodup --use-graphs true --use-gselect true \
+   data/train_nodup data/lang exp/tri4_sgmm2 exp/tri4_sgmm2_ali
+
+  steps/make_denlats_sgmm2.sh --nj "$train_nj" --sub-split "$train_nj" \
+   --acwt 0.2 --lattice-beam 10.0 --beam 18.0 \
+   --cmd "$decode_cmd" --transform-dir exp/tri4_ali_nodup \
+   data/train_nodup data/lang exp/tri4_sgmm2_ali exp/tri4_sgmm2_denlats
+
+  steps/train_mmi_sgmm2.sh --acwt 0.2 --cmd "$decode_cmd" \
+   --transform-dir exp/tri4_ali_nodup --boost 0.1 --drop-frames true \
+   data/train_nodup data/lang exp/tri4_sgmm2_ali exp/tri4_sgmm2_denlats exp/tri4_sgmm2_mmi_b0.1
+
+  (
+    for iter in 1 2 3 4; do
+      steps/decode_sgmm2_rescore.sh --cmd "$decode_cmd" --iter $iter \
+       --transform-dir exp/tri4/decode_train_dev data/lang data/train_dev \
+       exp/tri4_sgmm2/decode_train_dev exp/tri4_sgmm2_mmi_b0.1/decode_train_dev_it$iter
+    done
+  )
+
+fi
+
 # this will help find issues with the lexicon.
 # steps/cleanup/debug_lexicon.sh --nj 300 --cmd "$train_cmd" data/train_nodev data/lang exp/tri4 data/local/dict/lexicon.txt exp/debug_lexicon
 
 has_fisher=false
 
-if [ $STAGE -le 30 ]; then
+if [ $STAGE -le 100 ]; then
   # The 100k_nodup data is used in neural net training.
   steps/align_si.sh --nj 30 --cmd "$train_cmd" \
     data/train_100k_nodup data/lang exp/tri2 exp/tri2_ali_100k_nodup
 fi
 
-# SGMM system.
-# local/run_sgmm2.sh $has_fisher
 
 # Karel's DNN recipe on top of fMLLR features
 # local/nnet/run_dnn.sh --has-fisher $has_fisher
@@ -271,5 +315,6 @@ fi
 #                         --non-recurrent-projection-dim 128 \
 #                         --chunk-left-context 40 \
 #                         --chunk-right-context 40
+wait
 
 bash 看結果.sh
