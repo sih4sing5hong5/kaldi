@@ -242,5 +242,4 @@ has_fisher=false
 #                         --chunk-left-context 40 \
 #                         --chunk-right-context 40
 
-# getting results (see RESULTS file)
-# for x in 1 2 3a 3b 4a; do grep 'Percent Total Error' exp/tri$x/decode_train_dev/score_*/eval2000.ctm.filt.dtl | sort -k5 -g | head -1; done
+bash 看結果.sh
