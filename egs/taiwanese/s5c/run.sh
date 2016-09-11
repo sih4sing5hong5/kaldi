@@ -295,19 +295,31 @@ if [[ $STAGE -le 19 ]]; then
        exp/tri4_sgmm2/decode_train_dev exp/tri4_sgmm2_mmi_b0.1/decode_train_dev_it$iter
     done
   )
+fi
 
+# Do MPE from voxforge
+if [[ $STAGE -le 50 ]]; then
+  steps/train_mpe.sh data/train data/lang exp/tri2b_ali exp/tri2b_denlats exp/tri2b_mpe || exit 1;
+  (
+    for iter in 1 2 3 4; do
+      graph_dir=exp/tri4/graph
+      decode_dir=exp/tri4_mpe/decode_train_dev_it${iter}
+      steps/decode.sh --config conf/decode.config --iter ${iter} --nj 30 --cmd "$decode_cmd" \
+         --transform-dir exp/tri4/decode_train_dev $graph_dir data/train_dev $decode_dir
+    done
+  )
 fi
 
 # this will help find issues with the lexicon.
 # steps/cleanup/debug_lexicon.sh --nj 300 --cmd "$train_cmd" data/train_nodev data/lang exp/tri4 data/local/dict/lexicon.txt exp/debug_lexicon
 
-has_fisher=false
+# has_fisher=false
 
-if [ $STAGE -le 100 ]; then
-  # The 100k_nodup data is used in neural net training.
-  steps/align_si.sh --nj 30 --cmd "$train_cmd" \
-    data/train_100k_nodup data/lang exp/tri2 exp/tri2_ali_100k_nodup
-fi
+# if [ $STAGE -le 100 ]; then
+#   # The 100k_nodup data is used in neural net training.
+#   steps/align_si.sh --nj 30 --cmd "$train_cmd" \
+#     data/train_100k_nodup data/lang exp/tri2 exp/tri2_ali_100k_nodup
+# fi
 
 
 # Karel's DNN recipe on top of fMLLR features
