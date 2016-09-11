@@ -35,11 +35,10 @@ if [ $STAGE -le 2 ]; then
   utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
 fi
 
+LM='data/lang/語言模型.lm'
 # # Now train the language models.
 if [ $STAGE -le 3 ]; then
   # # Compiles G for trigram LM
-  LM='data/lang/語言模型.lm'
-
   cat $LM | utils/find_arpa_oovs.pl data/lang/words.txt  > data/lang/arpa_oov.txt
   cat $LM | \
       grep -v '<s> <s>' | \
@@ -155,14 +154,27 @@ fi
 # and re-create the lang directory.
 if [ $STAGE -le 14 ]; then
   steps/get_prons.sh --cmd "$train_cmd" data/train_nodup data/lang exp/tri3
-  # utils/dict_dir_add_pronprobs.sh --max-normalize true \
-  #   data/local/dict_nosp exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
-  #   exp/tri3/pron_bigram_counts_nowb.txt data/local/dict_sp
+  utils/dict_dir_add_pronprobs.sh --max-normalize true \
+    data/local/dict exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
+    exp/tri3/pron_bigram_counts_nowb.txt data/local/dict_sp
+  # Like stage 2
+  utils/prepare_lang.sh data/local/dict_sp "<UNK>"  data/local/lang_sp data/lang_sp
+  # Like stage 3
+  cat $LM | utils/find_arpa_oovs.pl data/lang_sp/words.txt  > data/lang_sp/arpa_oov.txt
+  cat $LM | \
+      grep -v '<s> <s>' | \
+      grep -v '</s> <s>' | \
+      grep -v '</s> </s>' | \
+      arpa2fst - | fstprint | \
+      utils/remove_oovs.pl data/lang_sp/arpa_oov.txt | \
+      utils/eps2disambig.pl | utils/s2eps.pl | fstcompile --isymbols=data/lang_sp/words.txt \
+        --osymbols=data/lang_sp/words.txt  --keep_isymbols=false --keep_osymbols=false | \
+       fstrmepsilon | fstarcsort > data/lang_sp/G.fst
 
   (
     graph_dir=exp/tri3/graph_sp
     $train_cmd $graph_dir/mkgraph.log \
-      utils/mkgraph.sh data/lang exp/tri3 $graph_dir
+      utils/mkgraph.sh data/lang_sp exp/tri3 $graph_dir
     steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
       $graph_dir data/train_dev exp/tri3/decode_train_dev_sp
   )
