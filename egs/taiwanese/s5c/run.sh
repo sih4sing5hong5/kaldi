@@ -104,7 +104,7 @@ if [ $STAGE -le 11 ]; then
     3200 30000 data/train_100k_nodup data/lang exp/mono_ali exp/tri1
 
   (
-    graph_dir=exp/tri1/graph_nosp_sw1_tg
+    graph_dir=exp/tri1/graph
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh data/lang exp/tri1 $graph_dir
     steps/decode_si.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
@@ -124,7 +124,7 @@ if [ $STAGE -le 12 ]; then
     # is not running, you can remove this loop and this mkgraph will create it.
     while [ ! -s data/lang/tmp/CLG_3_1.fst ]; do sleep 60; done
     sleep 20; # in case still writing.
-    graph_dir=exp/tri2/graph_nosp_sw1_tg
+    graph_dir=exp/tri2/graph
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh data/lang exp/tri2 $graph_dir
     steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
@@ -143,7 +143,7 @@ if [ $STAGE -le 13 ]; then
     6000 140000 data/train_nodup data/lang exp/tri2_ali_nodup exp/tri3
 
   (
-    graph_dir=exp/tri3/graph_nosp_sw1_tg
+    graph_dir=exp/tri3/graph
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh data/lang exp/tri3 $graph_dir
     steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
@@ -155,16 +155,16 @@ fi
 # and re-create the lang directory.
 if [ $STAGE -le 14 ]; then
   steps/get_prons.sh --cmd "$train_cmd" data/train_nodup data/lang exp/tri3
-  # utils/dict_dir_add_pronprobs.sh --max-normalize true \ff
+  # utils/dict_dir_add_pronprobs.sh --max-normalize true \
   #   data/local/dict_nosp exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
-  #   exp/tri3/pron_bigram_counts_nowb.txt data/local/dict
+  #   exp/tri3/pron_bigram_counts_nowb.txt data/local/dict_sp
 
   (
-    graph_dir=exp/tri3/graph_sw1_tg
+    graph_dir=exp/tri3/graph_sp
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh data/lang exp/tri3 $graph_dir
     steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
-      $graph_dir data/train_dev exp/tri3/decode_train_dev
+      $graph_dir data/train_dev exp/tri3/decode_train_dev_sp
   )
 fi
 
@@ -177,7 +177,7 @@ if [ $STAGE -le 15 ]; then
     11500 200000 data/train_nodup data/lang exp/tri3_ali_nodup exp/tri4
 
   (
-    graph_dir=exp/tri4/graph_sw1_tg
+    graph_dir=exp/tri4/graph
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh data/lang exp/tri4 $graph_dir
     steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
@@ -208,7 +208,7 @@ if [ $STAGE -le 16 ]; then
 
   (
     for iter in 1 2 3 4; do
-      graph_dir=exp/tri4/graph_sw1_tg
+      graph_dir=exp/tri4/graph
       decode_dir=exp/tri4_mmi_b0.1/decode_train_dev_${iter}.mdl_sw1_tg
       steps/decode.sh --nj 30 --cmd "$decode_cmd" \
         --config conf/decode.config --iter $iter \
@@ -229,7 +229,7 @@ if [ $STAGE -le 17 ]; then
     exp/tri4_denlats_nodup exp/tri4_fmmi_b0.1
   (
     for iter in 4 5 6 7 8; do
-      graph_dir=exp/tri4/graph_sw1_tg
+      graph_dir=exp/tri4/graph
       decode_dir=exp/tri4_fmmi_b0.1/decode_train_dev_it${iter}_sw1_tg
       steps/decode_fmmi.sh --nj 30 --cmd "$decode_cmd" --iter $iter \
         --transform-dir exp/tri4/decode_train_dev \
