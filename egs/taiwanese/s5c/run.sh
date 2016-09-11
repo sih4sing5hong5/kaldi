@@ -109,7 +109,7 @@ if [ $STAGE -le 11 ]; then
       utils/mkgraph.sh data/lang exp/tri1 $graph_dir
     steps/decode_si.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
       $graph_dir data/train_dev exp/tri1/decode_train_dev
-  ) &
+  )
 fi
 
 if [ $STAGE -le 12 ]; then
@@ -129,7 +129,7 @@ if [ $STAGE -le 12 ]; then
       utils/mkgraph.sh data/lang exp/tri2 $graph_dir
     steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
       $graph_dir data/train_dev exp/tri2/decode_train_dev
-  ) &
+  )
 fi
 
 # From now, we start using all of the data (except some duplicates of common
@@ -148,7 +148,7 @@ if [ $STAGE -le 13 ]; then
       utils/mkgraph.sh data/lang exp/tri3 $graph_dir
     steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
       $graph_dir data/train_dev exp/tri3/decode_train_dev
-  ) &
+  )
 fi
 
 # Now we compute the pronunciation and silence probabilities from training data,
@@ -165,7 +165,7 @@ if [ $STAGE -le 14 ]; then
       utils/mkgraph.sh data/lang exp/tri3 $graph_dir
     steps/decode.sh --nj 30 --cmd "$decode_cmd" --config conf/decode.config \
       $graph_dir data/train_dev exp/tri3/decode_train_dev
-  ) &
+  )
 fi
 
 # Train tri4, which is LDA+MLLT+SAT, on all the (nodup) data.
@@ -186,8 +186,7 @@ if [ $STAGE -le 15 ]; then
     # Will be used for confidence calibration example,
     # steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
     #   $graph_dir data/train_dev exp/tri4/decode_dev_sw1_tg
-  ) &
-  wait
+  )
 fi
 
 # MMI training starting from the LDA+MLLT+SAT systems on all the (nodup) data.
@@ -207,17 +206,16 @@ if [ $STAGE -le 16 ]; then
     --boost 0.1 --num-iters $num_mmi_iters \
     data/train_nodup data/lang exp/tri4_{ali,denlats}_nodup exp/tri4_mmi_b0.1
 
-  for iter in 1 2 3 4; do
-    (
+  (
+    for iter in 1 2 3 4; do
       graph_dir=exp/tri4/graph_sw1_tg
       decode_dir=exp/tri4_mmi_b0.1/decode_train_dev_${iter}.mdl_sw1_tg
       steps/decode.sh --nj 30 --cmd "$decode_cmd" \
         --config conf/decode.config --iter $iter \
         --transform-dir exp/tri4/decode_train_dev \
         $graph_dir data/train_dev $decode_dir
-    ) &
-  done
-  wait
+    done
+  )
 fi
 
 # Now do fMMI+MMI training
@@ -229,17 +227,15 @@ if [ $STAGE -le 17 ]; then
     --boost 0.1 --cmd "$train_cmd" \
     data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_dubm \
     exp/tri4_denlats_nodup exp/tri4_fmmi_b0.1
-
-  for iter in 4 5 6 7 8; do
-    (
+  (
+    for iter in 4 5 6 7 8; do
       graph_dir=exp/tri4/graph_sw1_tg
       decode_dir=exp/tri4_fmmi_b0.1/decode_train_dev_it${iter}_sw1_tg
       steps/decode_fmmi.sh --nj 30 --cmd "$decode_cmd" --iter $iter \
         --transform-dir exp/tri4/decode_train_dev \
         --config conf/decode.config $graph_dir data/train_dev $decode_dir
-    ) &
-  done
-  wait
+    done
+  )
 fi
 
 # SGMM2 Training & Decoding from timit
@@ -257,7 +253,7 @@ if [[ $STAGE -le 18 ]]; then
     steps/decode_sgmm2.sh --nj 30 --cmd "$decode_cmd"\
      --transform-dir exp/tri4/decode_train_dev $graph_dir data/train_dev \
      exp/tri4_sgmm2/decode_train_dev
-  ) #&
+  )
 fi
 
 # MMI + SGMM2 Training & Decoding from timit
