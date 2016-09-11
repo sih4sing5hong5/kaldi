@@ -22,7 +22,7 @@ numLeavesMLLT=2500
 numGaussMLLT=15000
 numLeavesSAT=2500
 numGaussSAT=15000
-numGaussUBM=400
+numGaussUBM=1400
 numLeavesSGMM=18000
 numGaussSGMM=60000
 
@@ -252,8 +252,12 @@ if [[ $STAGE -le 18 ]]; then
   # exp/tri3_ali +> tri4_ali_nodup
   # exp/ubm4 => tri4_dubm
   # sgmm2_4 => tri4_sgmm2
-  steps/train_sgmm2.sh --cmd "$train_cmd" $numLeavesSGMM $numGaussSGMM \
-   data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_dubm/final.ubm exp/tri4_sgmm2
+  steps/train_ubm.sh --cmd "$train_cmd" $numGaussUBM data/train_nodup data/lang \
+    exp/tri4_ali_nodup exp/tri4_ubm
+
+  # steps/train_sgmm2.sh is old version
+  steps/train_sgmm2_group.sh --cmd "$train_cmd" $numLeavesSGMM $numGaussSGMM \
+   data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_ubm/final.ubm exp/tri4_sgmm2
 
   (
     graph_dir=exp/tri4_sgmm2/graph
@@ -333,6 +337,5 @@ fi
 #                         --non-recurrent-projection-dim 128 \
 #                         --chunk-left-context 40 \
 #                         --chunk-right-context 40
-wait
 
 bash 看結果.sh
