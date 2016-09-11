@@ -7,7 +7,7 @@
 
 set -e # exit on error
 
-for x in exp/{tri1,tri2,tri3,tri4,tri4_mmi_b0.1,tri4_fmmi_b0.1,tri4_sgmm2 tri4_sgmm2_mmi_b0}/decode_train_dev* ; do
+for x in exp/{tri1,tri2,tri3,tri4,tri4_mmi_b0.1,tri4_fmmi_b0.1,tri4_sgmm2,tri4_sgmm2_mmi_b0}/decode_train_dev* ; do
   echo "$x:"
-  cat exp/$x/decode_train_dev*/wer_* | grep WER | ./utils/best_wer.sh 
+  cat $x/wer_* | grep WER | ./utils/best_wer.sh 
 done
