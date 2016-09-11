@@ -23,8 +23,8 @@ numGaussMLLT=15000
 numLeavesSAT=2500
 numGaussSAT=15000
 numGaussUBM=400
-numLeavesSGMM=7000
-numGaussSGMM=9000
+numLeavesSGMM=18000
+numGaussSGMM=60000
 
 # get corpus by 匯出Kaldi 格式資料
 if [ $STAGE -le 1 ]; then
@@ -245,7 +245,8 @@ if [[ $STAGE -le 18 ]]; then
 
   (
     graph_dir=exp/tri4_sgmm2/graph
-    utils/mkgraph.sh data/lang exp/tri4_sgmm2 $graph_dir
+    $train_cmd $graph_dir/mkgraph.log \
+      utils/mkgraph.sh data/lang exp/tri4_sgmm2 $graph_dir
 
     steps/decode_sgmm2.sh --nj 30 --cmd "$decode_cmd"\
      --transform-dir exp/tri4/decode_train_dev $graph_dir data/train_dev \
@@ -263,7 +264,7 @@ if [[ $STAGE -le 19 ]]; then
    data/train_nodup data/lang exp/tri4_sgmm2 exp/tri4_sgmm2_ali
 
   steps/make_denlats_sgmm2.sh --nj 30 --sub-split 30 \
-   --acwt 0.2 --lattice-beam 10.0 --beam 18.0 \
+   --acwt 0.2 --lattice-beam 6.0 --beam 9.0 \
    --cmd "$decode_cmd" --transform-dir exp/tri4_ali_nodup \
    data/train_nodup data/lang exp/tri4_sgmm2_ali exp/tri4_sgmm2_denlats
 
