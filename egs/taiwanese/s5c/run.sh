@@ -183,9 +183,6 @@ if [ $STAGE -le 15 ]; then
     steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
       --config conf/decode.config \
       $graph_dir data/train_dev exp/tri4/decode_train_dev
-    # Will be used for confidence calibration example,
-    # steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
-    #   $graph_dir data/train_dev exp/tri4/decode_dev_sw1_tg
   )
 fi
 
@@ -209,7 +206,7 @@ if [ $STAGE -le 16 ]; then
   (
     for iter in 1 2 3 4; do
       graph_dir=exp/tri4/graph
-      decode_dir=exp/tri4_mmi_b0.1/decode_train_dev_${iter}.mdl_sw1_tg
+      decode_dir=exp/tri4_mmi_b0.1/decode_train_dev_it${iter}
       steps/decode.sh --nj 30 --cmd "$decode_cmd" \
         --config conf/decode.config --iter $iter \
         --transform-dir exp/tri4/decode_train_dev \
@@ -230,7 +227,7 @@ if [ $STAGE -le 17 ]; then
   (
     for iter in 4 5 6 7 8; do
       graph_dir=exp/tri4/graph
-      decode_dir=exp/tri4_fmmi_b0.1/decode_train_dev_it${iter}_sw1_tg
+      decode_dir=exp/tri4_fmmi_b0.1/decode_train_dev_it${iter}
       steps/decode_fmmi.sh --nj 30 --cmd "$decode_cmd" --iter $iter \
         --transform-dir exp/tri4/decode_train_dev \
         --config conf/decode.config $graph_dir data/train_dev $decode_dir
