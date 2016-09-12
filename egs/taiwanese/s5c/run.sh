@@ -299,7 +299,7 @@ fi
 
 # Do MPE from voxforge
 if [[ $STAGE -le 50 ]]; then
-  steps/train_mpe.sh data/train data/lang exp/tri2b_ali exp/tri2b_denlats exp/tri2b_mpe || exit 1;
+  steps/train_mpe.sh data/train data/lang exp/tri4_ali_nodup exp/tri4_denlats_nodup exp/tri4_mpe
   (
     for iter in 1 2 3 4; do
       graph_dir=exp/tri4/graph
