@@ -2,6 +2,9 @@
 
 ## 走
 ```bash
+sudo apt-get install -y moreutils
+```
+```bash
 time bash -x run.sh  2>&1 | ts '[%Y-%m-%d %H:%M:%S]' | tee log_run
 ```
 ```bash
