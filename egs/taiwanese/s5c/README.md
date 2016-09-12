@@ -2,7 +2,7 @@
 
 ## 走
 ```bash
-time bash -x run.sh  2>&1 | ts '[%Y-%m-%d %H:%M:%S]' | tee log_run_sp
+time bash -x run.sh  2>&1 | ts '[%Y-%m-%d %H:%M:%S]' | tee log_run
 ```
 ```bash
 bash 看結果.sh  | less
