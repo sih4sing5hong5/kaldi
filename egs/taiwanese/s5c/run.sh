@@ -275,11 +275,11 @@ if [[ $STAGE -le 19 ]]; then
   # exp/tri3_ali +> tri4_ali_nodup
   # exp/ubm4 => tri4_dubm
   # sgmm2_4 => tri4_sgmm2
-  steps/align_sgmm2.sh --nj 30 --cmd "$train_cmd" \
+  steps/align_sgmm2.sh --nj 50 --cmd "$train_cmd" \
    --transform-dir exp/tri4_ali_nodup --use-graphs true --use-gselect true \
    data/train_nodup data/lang exp/tri4_sgmm2 exp/tri4_sgmm2_ali
 
-  steps/make_denlats_sgmm2.sh --nj 30 --sub-split 30 \
+  steps/make_denlats_sgmm2.sh --nj 50 --sub-split 30 \
    --acwt 0.2 --lattice-beam 6.0 --beam 9.0 \
    --cmd "$decode_cmd" --transform-dir exp/tri4_ali_nodup \
    data/train_nodup data/lang exp/tri4_sgmm2_ali exp/tri4_sgmm2_denlats
