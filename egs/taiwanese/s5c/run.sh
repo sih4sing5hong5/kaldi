@@ -198,10 +198,27 @@ if [ $STAGE -le 15 ]; then
   )
 fi
 
-# MMI training starting from the LDA+MLLT+SAT systems on all the (nodup) data.
+# Prepare tri4_ali_nodup for other training
 if [ $STAGE -le 16 ]; then
   steps/align_fmllr.sh --nj 50 --cmd "$train_cmd" \
     data/train_nodup data/lang exp/tri4 exp/tri4_ali_nodup
+fi
+
+# Do MPE from voxforge
+if [[ $STAGE -le 20 ]]; then
+  steps/train_mpe.sh data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_denlats_nodup exp/tri4_mpe
+  (
+    for iter in 1 2 3 4; do
+      graph_dir=exp/tri4/graph
+      decode_dir=exp/tri4_mpe/decode_train_dev_it${iter}
+      steps/decode.sh --config conf/decode.config --iter ${iter} --nj 30 --cmd "$decode_cmd" \
+         --transform-dir exp/tri4/decode_train_dev $graph_dir data/train_dev $decode_dir
+    done
+  )
+fi
+
+# MMI training starting from the LDA+MLLT+SAT systems on all the (nodup) data.
+if [ $STAGE -le 30 ]; then
 
   steps/make_denlats.sh --nj 50 --cmd "$decode_cmd" \
     --config conf/decode.config --transform-dir exp/tri4_ali_nodup \
@@ -228,7 +245,7 @@ if [ $STAGE -le 16 ]; then
 fi
 
 # Now do fMMI+MMI training
-if [ $STAGE -le 17 ]; then
+if [ $STAGE -le 31 ]; then
   steps/train_diag_ubm.sh --silence-weight 0.5 --nj 50 --cmd "$train_cmd" \
     700 data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_dubm
 
@@ -248,7 +265,7 @@ if [ $STAGE -le 17 ]; then
 fi
 
 # SGMM2 Training & Decoding from timit
-if [[ $STAGE -le 18 ]]; then
+if [[ $STAGE -le 40 ]]; then
   # exp/tri3_ali +> tri4_ali_nodup
   # exp/ubm4 => tri4_dubm
   # sgmm2_4 => tri4_sgmm2
@@ -271,7 +288,7 @@ if [[ $STAGE -le 18 ]]; then
 fi
 
 # MMI + SGMM2 Training & Decoding from timit
-if [[ $STAGE -le 19 ]]; then
+if [[ $STAGE -le 41 ]]; then
   # exp/tri3_ali +> tri4_ali_nodup
   # exp/ubm4 => tri4_dubm
   # sgmm2_4 => tri4_sgmm2
@@ -293,19 +310,6 @@ if [[ $STAGE -le 19 ]]; then
       steps/decode_sgmm2_rescore.sh --cmd "$decode_cmd" --iter $iter \
        --transform-dir exp/tri4/decode_train_dev data/lang data/train_dev \
        exp/tri4_sgmm2/decode_train_dev exp/tri4_sgmm2_mmi_b0.1/decode_train_dev_it$iter
-    done
-  )
-fi
-
-# Do MPE from voxforge
-if [[ $STAGE -le 50 ]]; then
-  steps/train_mpe.sh data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_denlats_nodup exp/tri4_mpe
-  (
-    for iter in 1 2 3 4; do
-      graph_dir=exp/tri4/graph
-      decode_dir=exp/tri4_mpe/decode_train_dev_it${iter}
-      steps/decode.sh --config conf/decode.config --iter ${iter} --nj 30 --cmd "$decode_cmd" \
-         --transform-dir exp/tri4/decode_train_dev $graph_dir data/train_dev $decode_dir
     done
   )
 fi
