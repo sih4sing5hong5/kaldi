@@ -196,6 +196,14 @@ if [ $STAGE -le 15 ]; then
       --config conf/decode.config \
       $graph_dir data/train_dev exp/tri4/decode_train_dev
   )
+  (
+    graph_dir=exp/tri4/graph_sp
+    $train_cmd $graph_dir/mkgraph.log \
+      utils/mkgraph.sh data/lang_sp exp/tri4 $graph_dir
+    steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
+      --config conf/decode.config \
+      $graph_dir data/train_dev exp/tri4/decode_train_dev_sp
+  )
 fi
 
 # Prepare tri4_ali_nodup for other training
@@ -213,6 +221,14 @@ if [[ $STAGE -le 20 ]]; then
       decode_dir=exp/tri4_mpe/decode_train_dev_it${iter}
       steps/decode.sh --config conf/decode.config --iter ${iter} --nj 30 --cmd "$decode_cmd" \
          --transform-dir exp/tri4/decode_train_dev $graph_dir data/train_dev $decode_dir
+    done
+  )
+  (
+    for iter in 1 2 3 4; do
+      graph_dir=exp/tri4/graph_sp
+      decode_dir=exp/tri4_mpe/decode_train_dev_sp_it${iter}
+      steps/decode.sh --config conf/decode.config --iter ${iter} --nj 30 --cmd "$decode_cmd" \
+         --transform-dir exp/tri4/decode_train_dev_sp $graph_dir data/train_dev $decode_dir
     done
   )
 fi
@@ -242,6 +258,16 @@ if [ $STAGE -le 30 ]; then
         $graph_dir data/train_dev $decode_dir
     done
   )
+  (
+    for iter in 1 2 3 4; do
+      graph_dir=exp/tri4/graph_sp
+      decode_dir=exp/tri4_mmi_b0.1/decode_train_dev_sp_it${iter}
+      steps/decode.sh --nj 30 --cmd "$decode_cmd" \
+        --config conf/decode.config --iter $iter \
+        --transform-dir exp/tri4/decode_train_dev_sp \
+        $graph_dir data/train_dev $decode_dir
+    done
+  )
 fi
 
 # Now do fMMI+MMI training
@@ -259,6 +285,15 @@ if [ $STAGE -le 31 ]; then
       decode_dir=exp/tri4_fmmi_b0.1/decode_train_dev_it${iter}
       steps/decode_fmmi.sh --nj 30 --cmd "$decode_cmd" --iter $iter \
         --transform-dir exp/tri4/decode_train_dev \
+        --config conf/decode.config $graph_dir data/train_dev $decode_dir
+    done
+  )
+  (
+    for iter in 4 5 6 7 8; do
+      graph_dir=exp/tri4/graph_sp
+      decode_dir=exp/tri4_fmmi_b0.1/decode_train_dev_sp_it${iter}
+      steps/decode_fmmi.sh --nj 30 --cmd "$decode_cmd" --iter $iter \
+        --transform-dir exp/tri4/decode_train_dev_sp \
         --config conf/decode.config $graph_dir data/train_dev $decode_dir
     done
   )
@@ -285,6 +320,15 @@ if [[ $STAGE -le 40 ]]; then
      --transform-dir exp/tri4/decode_train_dev $graph_dir data/train_dev \
      exp/tri4_sgmm2/decode_train_dev
   )
+  (
+    graph_dir=exp/tri4_sgmm2/graph_sp
+    $train_cmd $graph_dir/mkgraph.log \
+      utils/mkgraph.sh data/lang_sp exp/tri4_sgmm2 $graph_dir
+
+    steps/decode_sgmm2.sh --nj 30 --cmd "$decode_cmd"\
+     --transform-dir exp/tri4/decode_train_dev_sp $graph_dir data/train_dev \
+     exp/tri4_sgmm2/decode_train_dev_sp
+  )
 fi
 
 # MMI + SGMM2 Training & Decoding from timit
@@ -310,6 +354,13 @@ if [[ $STAGE -le 41 ]]; then
       steps/decode_sgmm2_rescore.sh --cmd "$decode_cmd" --iter $iter \
        --transform-dir exp/tri4/decode_train_dev data/lang data/train_dev \
        exp/tri4_sgmm2/decode_train_dev exp/tri4_sgmm2_mmi_b0.1/decode_train_dev_it$iter
+    done
+  )
+  (
+    for iter in 1 2 3 4; do
+      steps/decode_sgmm2_rescore.sh --cmd "$decode_cmd" --iter $iter \
+       --transform-dir exp/tri4/decode_train_dev_sp data/lang_sp data/train_dev \
+       exp/tri4_sgmm2/decode_train_dev_sp exp/tri4_sgmm2_mmi_b0.1/decode_train_dev_sp_it$iter
     done
   )
 fi
