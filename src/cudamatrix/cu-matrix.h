@@ -280,7 +280,7 @@ class CuMatrixBase {
                        const CuMatrixBase<Real> &output, Real power);
 
   /// Differentiate backward through the GroupPnorm function.
-  /// It is a combination of GroupPnormDeriv and MulRowsGroupMax.
+  /// It is a combination of GroupPnormDeriv and MulRowsGroupMat.
   void DiffGroupPnorm(const CuMatrixBase<Real> &in_value,
                       const CuMatrixBase<Real> &out_value,
                       const CuMatrixBase<Real> &out_deriv, Real power);
@@ -300,6 +300,20 @@ class CuMatrixBase {
   /// defined (it's not defined where multiple inputs in the group are equal to the output).
   void GroupMaxDeriv(const CuMatrixBase<Real> &input,
                      const CuMatrixBase<Real> &output);
+
+  /// Compute the parametric rectified linear unit function;
+  /// element by element, *this = src * (src > 0 ? alpha : beta)
+  void ParametricRelu(const CuMatrixBase<Real> &src,
+                      const CuVectorBase<Real> &alpha,
+                      const CuVectorBase<Real> &beta);
+
+  /// Differentiate backward through the parametric relu function.
+  /// Here the "value" is the Relu input. Does, element-by-element.
+  /// *this = diff * (value > 0 ? alpha : beta)
+  void DiffParametricRelu(const CuMatrixBase<Real> &value,
+                          const CuMatrixBase<Real> &diff,
+                          const CuVectorBase<Real> &alpha,
+                          const CuVectorBase<Real> &beta);
 
   /// Compute the hyperbolic tangent (tanh) function; element by element,
   /// *this = tanh(src).
@@ -321,6 +335,13 @@ class CuMatrixBase {
   /// xxxx(i) is row-vector; '*' and '-' are matrix operations.
   void DiffSoftmaxPerRow(const CuMatrixBase<Real> &value,
                          const CuMatrixBase<Real> &diff);
+
+  /// Differentiate backward through the log softmax function.
+  /// Here, "out_value" is the log softmax output. Does, for each row i,
+  /// *this(i) =  out_deriv(i) - sum(out_deriv(i)) .* exp(out_value(i))
+  /// xxxx(i) is row-vector.
+  void DiffLogSoftmaxPerRow(const CuMatrixBase<Real> &out_value,
+                            const CuMatrixBase<Real> &out_deriv);
 
   /// Differentiate the block [softmax+cross-entropy] :
   /// dE/da = posterior_mat - target_mat,
@@ -416,6 +437,7 @@ class CuMatrixBase {
   /// A = alpha * x * y^T + A .
   void AddVecVec(Real alpha, const CuVectorBase<Real> &x, const CuVectorBase<Real> &y);
   /// *this = a * b / c (by element; when c = 0, *this = a)
+  /// *this can be an alias of a, b or c safely and get expected result.
   void AddMatMatDivMat(const CuMatrixBase<Real> &A, const CuMatrixBase<Real> &B, const CuMatrixBase<Real> &C);
 
   /// *this = beta * *this + alpha * M M^T, for symmetric matrices.  It only

@@ -311,9 +311,11 @@ inline void cuda_mul_rows_group_mat(dim3 Gr, dim3 Bl, float *y, const float *x,
   cudaF_mul_rows_group_mat(Gr, Bl, y, x, d, src_stride, group_size);
 }
 inline void cuda_calc_pnorm_deriv(dim3 Gr, dim3 Bl, float *y, const float *x1,
-                                  const float *x2, MatrixDim d, int src_stride,
-                                  int group_size, float power) {
-  cudaF_calc_pnorm_deriv(Gr, Bl, y, x1, x2, d, src_stride, group_size, power);
+                                  const float *x2, MatrixDim y_dim,
+                                  int x1_stride, int x2_stride, int group_size,
+                                  float power) {
+  cudaF_calc_pnorm_deriv(Gr, Bl, y, x1, x2, y_dim, x1_stride, x2_stride,
+                         group_size, power);
 }
 inline void cuda_diff_group_pnorm(dim3 Gr, dim3 Bl, float *id, const float *iv,
                                   const float *ov, const float* od,
@@ -325,9 +327,10 @@ inline void cuda_diff_group_pnorm(dim3 Gr, dim3 Bl, float *id, const float *iv,
 }
 inline void cuda_calc_group_max_deriv(dim3 Gr, dim3 Bl, float *y,
                                       const float *x1, const float *x2,
-                                      MatrixDim d, int src_stride,
-                                      int group_size) {
-  cudaF_calc_group_max_deriv(Gr, Bl, y, x1, x2, d, src_stride, group_size);
+                                      MatrixDim y_dim, int x1_stride,
+                                      int x2_stride, int group_size) {
+  cudaF_calc_group_max_deriv(Gr, Bl, y, x1, x2, y_dim, x1_stride, x2_stride,
+                             group_size);
 }
 inline void cuda_add_mat(dim3 Gr, dim3 Bl, float alpha, const float *src,
                          float *dst, MatrixDim d, int src_stride, int A_trans) {
@@ -550,6 +553,17 @@ inline void cuda_diff_tanh(dim3 Gr, dim3 Bl, float *eout, const float *e,
                            int y_stride) {
   cudaF_diff_tanh(Gr, Bl, eout, e, y, d, e_stride, y_stride);
 }
+inline void cuda_parametric_relu(dim3 Gr, dim3 Bl, float *y, const float *x,
+                                 MatrixDim d, int src_stride,
+                                 const float *a, const float *b) {
+  cudaF_parametric_relu(Gr,Bl,y,x,d,src_stride,a,b);
+}
+inline void cuda_diff_parametric_relu(dim3 Gr, dim3 Bl, float *eout,
+                                      const float *e, const float *y,
+                                      MatrixDim d, int e_stride, int y_stride,
+                                      const float *a, const float *b) {
+  cudaF_diff_parametric_relu(Gr,Bl,eout,e,y,d,e_stride,y_stride,a,b);
+}
 inline void cuda_heaviside(dim3 Gr, dim3 Bl, float *y, const float *x,
                            MatrixDim d, int src_stride) {
   cudaF_heaviside(Gr, Bl, y, x, d, src_stride);
@@ -562,9 +576,9 @@ inline void cuda_softmax_reduce(size_t Gr, size_t Bl, float *y, const float *x,
   cudaF_softmax_reduce(Gr, Bl, y, x, d, src_stride);
 }
 inline void cuda_log_softmax_reduce(size_t Gr, size_t Bl, float *y,
-                                    const float *x, MatrixDim d,
-                                    int src_stride) {
-  cudaF_log_softmax_reduce(Gr, Bl, y, x, d, src_stride);
+                                    const float *x, MatrixDim y_dim,
+                                    int x_stride) {
+  cudaF_log_softmax_reduce(Gr, Bl, y, x, y_dim, x_stride);
 }
 
 inline void cuda_regularize_l1(dim3 Gr, dim3 Bl, float *wei, float *grad,
@@ -586,6 +600,15 @@ inline void cuda_diff_softmax(dim3 Gr, dim3 Bl, float* x, const MatrixDim dim,
                               const float* value, const int value_stride,
                               const float* diff, const int diff_stride) {
   cudaF_diff_softmax(Gr, Bl, x, dim, value, value_stride, diff, diff_stride);
+}
+inline void cuda_diff_log_softmax(dim3 Gr, dim3 Bl,
+                                  const MatrixDim in_deriv_dim,
+                                  const float* out_value,
+                                  const int out_value_stride,
+                                  const float* out_deriv,
+                                  const int out_deriv_stride, float* in_deriv) {
+  cudaF_diff_log_softmax(Gr, Bl, in_deriv_dim, out_value, out_value_stride,
+                         out_deriv, out_deriv_stride, in_deriv);
 }
 inline void cuda_copy_rows_from_vec(dim3 Gr, dim3 Bl, float *mat_out,
                                     MatrixDim d_out, const float *v_in) {
@@ -828,9 +851,11 @@ inline void cuda_mul_rows_group_mat(dim3 Gr, dim3 Bl, double *y,
   cudaD_mul_rows_group_mat(Gr, Bl, y, x, d, src_stride, group_size);
 }
 inline void cuda_calc_pnorm_deriv(dim3 Gr, dim3 Bl, double *y, const double *x1,
-                                  const double *x2, MatrixDim d, int src_stride,
-                                  int group_size, double power) {
-  cudaD_calc_pnorm_deriv(Gr, Bl, y, x1, x2, d, src_stride, group_size, power);
+                                  const double *x2, MatrixDim y_dim,
+                                  int x1_stride, int x2_stride, int group_size,
+                                  double power) {
+  cudaD_calc_pnorm_deriv(Gr, Bl, y, x1, x2, y_dim, x1_stride, x2_stride,
+                         group_size, power);
 }
 inline void cuda_diff_group_pnorm(dim3 Gr, dim3 Bl, double *id,
                                   const double *iv, const double *ov,
@@ -842,9 +867,10 @@ inline void cuda_diff_group_pnorm(dim3 Gr, dim3 Bl, double *id,
 }
 inline void cuda_calc_group_max_deriv(dim3 Gr, dim3 Bl, double *y,
                                       const double *x1, const double *x2,
-                                      MatrixDim d, int src_stride,
-                                      int group_size) {
-  cudaD_calc_group_max_deriv(Gr, Bl, y, x1, x2, d, src_stride, group_size);
+                                      MatrixDim y_dim, int x1_stride,
+                                      int x2_stride, int group_size) {
+  cudaD_calc_group_max_deriv(Gr, Bl, y, x1, x2, y_dim, x1_stride, x2_stride,
+                             group_size);
 }
 inline void cuda_add_mat(dim3 Gr, dim3 Bl, double alpha, const double *src,
                          double *dst, MatrixDim d, int src_stride,
@@ -1072,6 +1098,17 @@ inline void cuda_diff_tanh(dim3 Gr, dim3 Bl, double *eout, const double *e,
                            int y_stride) {
   cudaD_diff_tanh(Gr, Bl, eout, e, y, d, e_stride, y_stride);
 }
+inline void cuda_parametric_relu(dim3 Gr, dim3 Bl, double *y, const double *x,
+                                 MatrixDim d, int src_stride,
+                                 const double *a, const double *b) {
+  cudaD_parametric_relu(Gr,Bl,y,x,d,src_stride,a,b);
+}
+inline void cuda_diff_parametric_relu(dim3 Gr, dim3 Bl, double *eout,
+                                      const double *e, const double *y,
+                                      MatrixDim d, int e_stride, int y_stride,
+                                      const double *a, const double *b) {
+  cudaD_diff_parametric_relu(Gr,Bl,eout,e,y,d,e_stride,y_stride,a,b);
+}
 inline void cuda_heaviside(dim3 Gr, dim3 Bl, double *y, const double *x,
                            MatrixDim d, int src_stride) {
   cudaD_heaviside(Gr, Bl, y, x, d, src_stride);
@@ -1081,9 +1118,9 @@ inline void cuda_softmax_reduce(size_t Gr, size_t Bl, double *y,
   cudaD_softmax_reduce(Gr, Bl, y, x, d, src_stride);
 }
 inline void cuda_log_softmax_reduce(size_t Gr, size_t Bl, double *y,
-                                    const double *x, MatrixDim d,
-                                    int src_stride) {
-  cudaD_log_softmax_reduce(Gr, Bl, y, x, d, src_stride);
+                                    const double *x, MatrixDim y_dim,
+                                    int x_stride) {
+  cudaD_log_softmax_reduce(Gr, Bl, y, x, y_dim, x_stride);
 }
 
 inline void cuda_regularize_l1(dim3 Gr, dim3 Bl, double *wei, double *grad,
@@ -1105,6 +1142,16 @@ inline void cuda_diff_softmax(dim3 Gr, dim3 Bl, double* x, const MatrixDim dim,
                               const double* value, const int value_stride,
                               const double* diff, const int diff_stride) {
   cudaD_diff_softmax(Gr, Bl, x, dim, value, value_stride, diff, diff_stride);
+}
+inline void cuda_diff_log_softmax(dim3 Gr, dim3 Bl,
+                                  const MatrixDim in_deriv_dim,
+                                  const double* out_value,
+                                  const int out_value_stride,
+                                  const double* out_deriv,
+                                  const int out_deriv_stride,
+                                  double* in_deriv) {
+  cudaD_diff_log_softmax(Gr, Bl, in_deriv_dim, out_value, out_value_stride,
+                         out_deriv, out_deriv_stride, in_deriv);
 }
 inline void cuda_copy_rows_from_vec(dim3 Gr, dim3 Bl, double *mat_out,
                                     MatrixDim d_out, const double *v_in) {

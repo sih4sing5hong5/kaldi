@@ -1111,6 +1111,26 @@ template<typename Real> static void UnitTestCuMatrixAddMatMatElements() {
   KALDI_ASSERT(M.Sum() != 0.0);
 }
 
+template<typename Real> static void UnitTestCuMatrixAddMatMatDivMat() {
+  // M = a * b / c (by element; when c = 0, M = a)
+  MatrixIndexT dimM = 100 + Rand() % 255, dimN = 100 + Rand() % 255;
+  CuMatrix<Real> M(dimM, dimN), A(dimM, dimN), B(dimM, dimN), C(dimM, dimN);
+  CuMatrix<Real> ref(dimM, dimN);
+  M.SetRandn();
+  A.SetRandn();
+  B.SetRandn();
+  C.SetRandn();
+
+  M.AddMatMatDivMat(A,B,C);
+  ref.AddMatMatElements(1.0, A, B, 0.0);
+  ref.DivElements(C);
+  AssertEqual(M, ref);
+
+  C.SetZero();
+  M.AddMatMatDivMat(A,B,C);
+  AssertEqual(M, A);
+}
+
 template<typename Real>
 static void UnitTestCuMatrixDivRowsVec() {
   MatrixIndexT dimM = 1000, dimN = 5;
@@ -1432,7 +1452,7 @@ template<typename Real>
 static void UnitTestCuMatrixAddMatMatBatched() {
   // Random stride is disabled as AddMatMatBatched requires consistent stride
 #if HAVE_CUDA == 1
-  CuDevice::Instantiate().SetRandomStrideMode(false);
+  bool old_mode = CuDevice::Instantiate().SetDebugStrideMode(false);
 #endif
   const int32 batchCount = 10;
   std::vector<Matrix<Real>* > Ha(batchCount), Hb(batchCount), Hc1(batchCount), Hc2(batchCount);
@@ -1497,7 +1517,7 @@ static void UnitTestCuMatrixAddMatMatBatched() {
     delete DA[i]; delete DB[i]; delete DC1[i]; delete DC2[i];
   }
 #if HAVE_CUDA == 1
-  CuDevice::Instantiate().SetRandomStrideMode(true);
+  CuDevice::Instantiate().SetDebugStrideMode(old_mode);
 #endif
 }
 
@@ -2018,6 +2038,43 @@ static void UnitTestCuDiffSoftmax() {
     Vector<Real> pe_vec(D.NumRows()); // For each row i, the dot product (p_t . e_t).
     pe_vec.AddDiagMatMat(1.0, P, kNoTrans, E, kTrans, 0.0);
     D.AddDiagVecMat(-1.0, pe_vec, P, kNoTrans, 1.0); // does D -= diag(pe_vec) * P.
+  }
+
+  Matrix<Real> Ho2(m, n);
+  Do.CopyToMat(&Ho2);
+
+  AssertEqual(Ho, Ho2);
+}
+
+
+template<typename Real>
+static void UnitTestCuDiffLogSoftmax() {
+  int m = 100, n = 111;
+  Matrix<Real> Hi(m, n);
+  Matrix<Real> Ho(m, n);
+  Matrix<Real> Hy(m, n);
+  Hi.SetRandn();
+  RandZeroToOneMatrix(&Hy);
+
+  CuMatrix<Real> Di(m, n);
+  CuMatrix<Real> Do(m, n);
+  CuMatrix<Real> Dy(m, n);
+  Di.CopyFromMat(Hi);
+  Dy.CopyFromMat(Hy);
+
+  //gpu
+  Do.DiffLogSoftmaxPerRow(Dy, Di);
+  //cpu
+  {
+    const MatrixBase<Real> &Y(Hy), &E(Hi);
+    MatrixBase<Real> &D(Ho);
+    D.CopyFromMat(Y);
+    D.ApplyExp();                           // exp(y)
+    Vector<Real> E_sum(D.NumRows());        // Initializes to zero
+    E_sum.AddColSumMat(1.0, E);             // Sum(e)
+    D.MulRowsVec(E_sum);                    // exp(y) Sum(e)
+    D.Scale(-1.0);                          // - exp(y) Sum(e)
+    D.AddMat(1.0, E, kNoTrans);             // e - exp(y_i) Sum(e)
   }
 
   Matrix<Real> Ho2(m, n);
@@ -2625,6 +2682,7 @@ template<typename Real> void CudaMatrixUnitTest() {
   UnitTestCuMatrixAdd2<Real>();
   UnitTestCuDiffSigmoid<Real>();
   UnitTestCuDiffSoftmax<Real>();
+  UnitTestCuDiffLogSoftmax<Real>();
   UnitTestCuMatrixGroupPnorm<Real>();
   UnitTestCuMatrixGroupPnormDeriv<Real>();
   UnitTestCuMatrixDiffGroupPnorm<Real>();
@@ -2642,6 +2700,7 @@ template<typename Real> void CudaMatrixUnitTest() {
   UnitTestCuMatrixAddDiagVecMat<Real>();
   UnitTestCuMatrixAddMatDiagVec<Real>();
   UnitTestCuMatrixAddMatMatElements<Real>();
+  UnitTestCuMatrixAddMatMatDivMat<Real>();
   UnitTestCuTanh<Real>();
   UnitTestCuCholesky<Real>();
   UnitTestCuDiffTanh<Real>();
@@ -2656,7 +2715,7 @@ template<typename Real> void CudaMatrixUnitTest() {
 int main() {
   for (int32 loop = 0; loop < 2; loop++) {
 #if HAVE_CUDA == 1
-    CuDevice::Instantiate().SetRandomStrideMode(true);
+    CuDevice::Instantiate().SetDebugStrideMode(true);
     if (loop == 0)
       CuDevice::Instantiate().SelectGpuId("no");
     else
