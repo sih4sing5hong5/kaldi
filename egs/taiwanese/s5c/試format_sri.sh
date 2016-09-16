@@ -40,7 +40,6 @@ tshi3='tshi3/train'
     $graph_dir $tshi3 exp/tri4/decode_tshi3
 
   steps/lmrescore.sh  --cmd "$decode_cmd" \
-    data/lang tshi3/lang $tshi3 \
+    data/lang $LANG_DIR $tshi3 \
     exp/tri4/decode_tshi3 exp/tri4/decode_tshi3.format_sri
 )
-1
