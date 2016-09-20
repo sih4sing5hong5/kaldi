@@ -210,6 +210,10 @@ fi
 if [ $STAGE -le 16 ]; then
   steps/align_fmllr.sh --nj 50 --cmd "$train_cmd" \
     data/train_nodup data/lang exp/tri4 exp/tri4_ali_nodup
+
+  steps/make_denlats.sh --nj 50 --cmd "$decode_cmd" \
+    --config conf/decode.config --transform-dir exp/tri4_ali_nodup \
+    data/train_nodup data/lang exp/tri4 exp/tri4_denlats_nodup
 fi
 
 # Do MPE from voxforge
@@ -235,11 +239,6 @@ fi
 
 # MMI training starting from the LDA+MLLT+SAT systems on all the (nodup) data.
 if [ $STAGE -le 30 ]; then
-
-  steps/make_denlats.sh --nj 50 --cmd "$decode_cmd" \
-    --config conf/decode.config --transform-dir exp/tri4_ali_nodup \
-    data/train_nodup data/lang exp/tri4 exp/tri4_denlats_nodup
-
   # 4 iterations of MMI seems to work well overall. The number of iterations is
   # used as an explicit argument even though train_mmi.sh will use 4 iterations by
   # default.
@@ -271,7 +270,7 @@ if [ $STAGE -le 30 ]; then
 fi
 
 # Now do fMMI+MMI training
-if [ $STAGE -le 31 ]; then
+if [ $STAGE -le 40 ]; then
   steps/train_diag_ubm.sh --silence-weight 0.5 --nj 50 --cmd "$train_cmd" \
     700 data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_dubm
 
@@ -300,7 +299,7 @@ if [ $STAGE -le 31 ]; then
 fi
 
 # SGMM2 Training & Decoding from timit
-if [[ $STAGE -le 40 ]]; then
+if [[ $STAGE -le 50 ]]; then
   # exp/tri3_ali +> tri4_ali_nodup
   # exp/ubm4 => tri4_dubm
   # sgmm2_4 => tri4_sgmm2
@@ -332,7 +331,7 @@ if [[ $STAGE -le 40 ]]; then
 fi
 
 # MMI + SGMM2 Training & Decoding from timit
-if [[ $STAGE -le 41 ]]; then
+if [[ $STAGE -le 51 ]]; then
   # exp/tri3_ali +> tri4_ali_nodup
   # exp/ubm4 => tri4_dubm
   # sgmm2_4 => tri4_sgmm2
