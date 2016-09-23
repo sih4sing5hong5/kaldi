@@ -23,7 +23,8 @@ cat $LM | \
   utils/remove_oovs.pl $LANG_DIR/arpa_oov.txt | \
   utils/eps2disambig.pl | utils/s2eps.pl | fstcompile --isymbols=$LANG_DIR/words.txt \
     --osymbols=$LANG_DIR/words.txt  --keep_isymbols=false --keep_osymbols=false | \
-   fstrmepsilon | fstarcsort > $LANG_DIR/G.fst
+   fstrmepsilon | fstarcsort --sort_type=ilabel > $LANG_DIR/G.fst
+utils/validate_lang.pl --skip-determinization-check $LANG_DIR
 
 tshi3='tshi3/train'
 (
