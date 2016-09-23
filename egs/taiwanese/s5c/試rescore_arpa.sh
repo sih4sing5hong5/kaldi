@@ -10,19 +10,13 @@ set -e # exit on error
 # # Now train the language models.
 LM='tshi3/lang/語言模型.lm'
 
-LANG_DIR='tshi3/lang_format_sri'
+LANG_DIR='tshi3/lang_rescore_arpa'
 
 utils/prepare_lang.sh tshi3/local/dict "<UNK>"  tshi3/local/lang tshi3/lang
 
 LM_GZ='tshi3/lang/語言模型.lm.gz'
 cat $LM | gzip > $LM_GZ
-utils/format_lm_sri.sh tshi3/lang $LM_GZ $LANG_DIR
-
-(
-  graph_dir=exp/tri4/graph_format_sri
-  $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh $LANG_DIR exp/tri4 $graph_dir
-)
+utils/build_const_arpa_lm.sh $LM_GZ tshi3/lang $LANG_DIR
 
 tshi3='tshi3/train'
 (
@@ -43,13 +37,20 @@ tshi3='tshi3/train'
 
   steps/decode_fmllr.sh --nj 4 --cmd "$decode_cmd" \
     --config conf/decode.config \
-    $graph_dir $tshi3 exp/tri4/decode_format_sri
+    $graph_dir $tshi3 exp/tri4_mpe/decode_tshi3
+
+  steps/lmrescore_const_arpa.sh  --cmd "$decode_cmd" \
+    data/lang $LANG_DIR $tshi3 \
+    exp/tri4_mpe/decode_tshi3 exp/tri4_mpe/decode_tshi3.rescored
 )
 (
   graph_dir=exp/tri4/graph
 
-  steps/decode.sh --nj 4 --cmd "$decode_cmd" \
+  steps/decode_fmllr.sh --nj 4 --cmd "$decode_cmd" \
     --config conf/decode.config \
-    --iter 4 \
-    $graph_dir $tshi3 exp/tri4_mpe/decode_format_sri
+    $graph_dir $tshi3 exp/tri4/decode_tshi3
+
+  steps/lmrescore_const_arpa.sh  --cmd "$decode_cmd" \
+    data/lang $LANG_DIR $tshi3 \
+    exp/tri4/decode_tshi3 exp/tri4/decode_tshi3.rescored
 )

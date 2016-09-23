@@ -12,7 +12,7 @@ LM='tshi3/lang/語言模型.lm'
 
 LANG_DIR='tshi3/lang_new_g'
 
-utils/prepare_lang.sh data/local/dict "<UNK>"  tshi3/local/lang $LANG_DIR
+utils/prepare_lang.sh tshi3/local/dict "<UNK>"  tshi3/local/lang $LANG_DIR
 
 cat $LM | utils/find_arpa_oovs.pl $LANG_DIR/words.txt  > $LANG_DIR/arpa_oov.txt
 cat $LM | \
@@ -33,7 +33,7 @@ tshi3='tshi3/train'
 
   mfccdir=tshi3/mfcc
   make_mfcc_dir=exp/make_mfcc/tshi3
-  rm -rf $mfccdir make_mfcc_dir
+  rm -rf $mfccdir $make_mfcc_dir
 
   steps/make_mfcc.sh --nj 4 --cmd "$train_cmd" \
    $tshi3 $make_mfcc_dir $mfccdir
