@@ -56,7 +56,7 @@ if [ $STAGE -le 4 ]; then
   # mfccdir should be some place with a largish disk where you
   # want to store MFCC features.
   mfccdir=mfcc
-  rmdir -rf $mfccdir exp/make_mfcc/train
+  rm -rf $mfccdir exp/make_mfcc/train
   steps/make_mfcc.sh --nj 20 --cmd "$train_cmd" \
    data/train exp/make_mfcc/train $mfccdir
   steps/compute_cmvn_stats.sh data/train exp/make_mfcc/train $mfccdir
