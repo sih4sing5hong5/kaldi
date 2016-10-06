@@ -1,7 +1,7 @@
 exp/tri1/decode_train_dev:
-%WER 95.52 [ 21086 / 22074, 1343 ins, 6601 del, 13142 sub ] 
+%WER 95.10 [ 20993 / 22074, 1263 ins, 6847 del, 12883 sub ] 
 exp/tri2/decode_train_dev:
-%WER 94.03 [ 20756 / 22074, 1255 ins, 6766 del, 12735 sub ] 
+%WER 93.58 [ 20657 / 22074, 1148 ins, 6877 del, 12632 sub ] 
 exp/tri3/decode_train_dev:
 %WER 91.92 [ 20290 / 22074, 1416 ins, 6157 del, 12717 sub ] 
 exp/tri3/decode_train_dev_sp:
