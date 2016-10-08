@@ -1,3 +1,5 @@
+. ./path.sh
+
 for last; do true; done
 
 grep "$last" data/train/segments
