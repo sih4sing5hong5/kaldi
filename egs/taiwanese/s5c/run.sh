@@ -27,6 +27,13 @@ numLeavesSGMM=18000
 numGaussSGMM=60000
 
 # get corpus by 匯出Kaldi 格式資料
+if [ $STAGE -le 0 ]; then
+  for x in data/train/{text,segments,utt2spk}; do
+	  grep -vwF -f bo5-ai3.pio2 $x > $x.tmp
+	  mv $x.tmp $x
+  done
+fi
+
 if [ $STAGE -le 1 ]; then
   utils/utt2spk_to_spk2utt.pl data/train/utt2spk > data/train/spk2utt
 fi
