@@ -27,11 +27,14 @@ numLeavesSGMM=18000
 numGaussSGMM=60000
 
 # get corpus by 匯出Kaldi 格式資料
+
 if [ $STAGE -le 0 ]; then
-  for x in data/train/{text,segments,utt2spk}; do
-	  grep -vwF -f bo5-ai3.pio2 $x > $x.tmp
-	  mv $x.tmp $x
-  done
+  if [ -f bo5-ai3.pio2 ]; then
+    for x in data/train/{text,segments,utt2spk}; do
+  	  grep -vwF -f bo5-ai3.pio2 $x > $x.tmp
+  	  mv $x.tmp $x
+    done
+  fi
 fi
 
 if [ $STAGE -le 1 ]; then
