@@ -64,11 +64,11 @@ if [ $STAGE -le 4 ]; then
   # want to store MFCC features.
   mfccdir=mfcc
   rm -rf $mfccdir exp/make_mfcc/train
+  utils/fix_data_dir.sh data/train
   steps/make_mfcc.sh --nj 20 --cmd "$train_cmd" \
    data/train exp/make_mfcc/train $mfccdir
   steps/compute_cmvn_stats.sh data/train exp/make_mfcc/train $mfccdir
 #  utils/validate_data_dir.sh data/train
-  utils/fix_data_dir.sh data/train
 fi
 
 # Split corpus for test and mono_train
