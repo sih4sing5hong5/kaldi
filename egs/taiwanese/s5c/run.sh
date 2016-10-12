@@ -28,15 +28,6 @@ numGaussSGMM=60000
 
 # get corpus by 匯出Kaldi 格式資料
 
-if [ $STAGE -le 0 ]; then
-  if [ -f bo5-ai3.pio2 ]; then
-    for x in data/train/{text,segments,utt2spk}; do
-  	  grep -vwF -f bo5-ai3.pio2 $x > $x.tmp
-  	  mv $x.tmp $x
-    done
-  fi
-fi
-
 if [ $STAGE -le 1 ]; then
   utils/utt2spk_to_spk2utt.pl data/train/utt2spk > data/train/spk2utt
 fi
@@ -61,21 +52,8 @@ if [ $STAGE -le 3 ]; then
        fstrmepsilon | fstarcsort > data/lang/G.fst
 fi
 
-# Now make MFCC features.
-if [ $STAGE -le 4 ]; then
-  # mfccdir should be some place with a largish disk where you
-  # want to store MFCC features.
-  mfccdir=mfcc
-  rm -rf $mfccdir exp/make_mfcc/train
-  utils/fix_data_dir.sh data/train
-  steps/make_mfcc.sh --nj 20 --cmd "$train_cmd" \
-   data/train exp/make_mfcc/train $mfccdir
-  steps/compute_cmvn_stats.sh data/train exp/make_mfcc/train $mfccdir
-#  utils/validate_data_dir.sh data/train
-fi
-
 # Split corpus for test and mono_train
-if [ $STAGE -le 5 ]; then
+if [ $STAGE -le 4 ]; then
   # Use the first 4k sentences as dev set.  Note: when we trained the LM, we used
   # the 1st 10k sentences as dev set, so the 1st 4k won't have been used in the
   # LM training data.   However, they will be in the lexicon, plus speakers
@@ -83,7 +61,34 @@ if [ $STAGE -le 5 ]; then
   utils/subset_data_dir.sh --first data/train 4000 data/train_dev # 5hr 6min
   n=$[`cat data/train/segments | wc -l` - 4000]
   utils/subset_data_dir.sh --last data/train $n data/train_nodev
+fi
 
+if [ $STAGE -le 5 ]; then
+  if [ -f bo5-ai3.pio2 ]; then
+    for x in data/train_nodev/{text,segments,utt2spk}; do
+      grep -vwF -f bo5-ai3.pio2 $x > $x.tmp
+      mv $x.tmp $x
+    done
+  fi
+fi
+
+# Now make MFCC features.
+if [ $STAGE -le 6 ]; then
+  # mfccdir should be some place with a largish disk where you
+  # want to store MFCC features.
+  for i in train_dev train_nodev; do
+    data_dir=data/$i
+    make_mfcc_log=exp/make_mfcc/$i
+    mfccdir=mfcc/$i
+    rm -rf $make_mfcc_log $mfccdir
+    utils/fix_data_dir.sh $data_dir
+    steps/make_mfcc.sh --nj 20 --cmd "$train_cmd" \
+     $data_dir $make_mfcc_log $mfccdir
+    steps/compute_cmvn_stats.sh $data_dir $make_mfcc_log $mfccdir
+  done
+fi
+
+if [ $STAGE -le 7 ]; then
   # Now-- there are 260k utterances (313hr 23min), and we want to start the
   # monophone training on relatively short utterances (easier to align), but not
   # only the shortest ones (mostly uh-huh).  So take the 100k shortest ones, and
