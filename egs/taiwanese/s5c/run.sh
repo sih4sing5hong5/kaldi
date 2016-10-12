@@ -36,7 +36,7 @@ if [ $STAGE -le 2 ]; then
   utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
 fi
 
-LM='data/lang/語言模型.lm'
+LM='data/local/lm/語言模型.lm'
 # # Now train the language models.
 if [ $STAGE -le 3 ]; then
   # # Compiles G for trigram LM
