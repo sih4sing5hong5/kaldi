@@ -1,6 +1,6 @@
 set -e # exit on error
 
-grep WARN exp/{tri1,tri2,tri3,tri4}/log/align.* | \
+grep WARN exp/{mono,tri1,tri2,tri3,tri4}{,_ali,_ali_nodup}/log/align.* | \
   grep tong | \
   sed 's/.*\(tong.*ku[0-9]*\).*/\1/g' | \
   sort | \
