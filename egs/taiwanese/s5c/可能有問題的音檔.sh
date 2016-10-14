@@ -1,6 +1,6 @@
 set -e # exit on error
 
-grep WARN exp/{mono,tri1,tri2,tri3,tri4}{,_ali,_ali_nodup}/log/align.* | \
+grep WARN exp/{mono,tri1,tri2,tri3,tri4}{,_ali,_ali_nodup}/log/a* | \
   grep tong | \
   sed 's/.*\(tong.*ku[0-9]*\).*/\1/g' | \
   sort | \
@@ -11,6 +11,6 @@ if [ $# -eq 0 ]; then
 else
   cat king3ko3.pio2 | \
     awk -v liong7=$1 '{if($1>=liong7)print $2}' | \
-    tee bo5-ai3.pio2
+    cat >> bo5-ai3.pio2
 fi
 
