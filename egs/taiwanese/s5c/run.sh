@@ -154,11 +154,11 @@ fi
 # utterances, which don't really contribute much).
 if [ $STAGE -le 13 ]; then
   steps/align_si.sh --nj 30 --cmd "$train_cmd" \
-    data/train_nodup data/lang exp/tri2 exp/tri2_ali_nodup
+    data/train_nodup data/lang exp/tri2 exp/tri2_ali
 
   # Do another iteration of LDA+MLLT training, on all the data.
   steps/train_lda_mllt.sh --cmd "$train_cmd" \
-    6000 140000 data/train_nodup data/lang exp/tri2_ali_nodup exp/tri3
+    6000 140000 data/train_nodup data/lang exp/tri2_ali exp/tri3
 
   (
     graph_dir=exp/tri3/graph
@@ -203,10 +203,10 @@ fi
 # Train tri4, which is LDA+MLLT+SAT, on all the (nodup) data.
 if [ $STAGE -le 15 ]; then
   steps/align_fmllr.sh --nj 30 --cmd "$train_cmd" \
-    data/train_nodup data/lang exp/tri3 exp/tri3_ali_nodup
+    data/train_nodup data/lang exp/tri3 exp/tri3_ali
 
   steps/train_sat.sh  --cmd "$train_cmd" \
-    11500 200000 data/train_nodup data/lang exp/tri3_ali_nodup exp/tri4
+    11500 200000 data/train_nodup data/lang exp/tri3_ali exp/tri4
 
   (
     graph_dir=exp/tri4/graph
@@ -226,19 +226,19 @@ if [ $STAGE -le 15 ]; then
   )
 fi
 
-# Prepare tri4_ali_nodup for other training
+# Prepare tri4_ali for other training
 if [ $STAGE -le 16 ]; then
   steps/align_fmllr.sh --nj 50 --cmd "$train_cmd" \
-    data/train_nodup data/lang exp/tri4 exp/tri4_ali_nodup
+    data/train_nodup data/lang exp/tri4 exp/tri4_ali
 
   steps/make_denlats.sh --nj 50 --cmd "$decode_cmd" \
-    --config conf/decode.config --transform-dir exp/tri4_ali_nodup \
+    --config conf/decode.config --transform-dir exp/tri4_ali \
     data/train_nodup data/lang exp/tri4 exp/tri4_denlats_nodup
 fi
 
 # Do MPE from voxforge
 if [[ $STAGE -le 20 ]]; then
-  steps/train_mpe.sh data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_denlats_nodup exp/tri4_mpe
+  steps/train_mpe.sh data/train_nodup data/lang exp/tri4_ali exp/tri4_denlats_nodup exp/tri4_mpe
   (
     for iter in 1 2 3 4; do
       graph_dir=exp/tri4/graph
@@ -292,11 +292,11 @@ fi
 # Now do fMMI+MMI training
 if [ $STAGE -le 40 ]; then
   steps/train_diag_ubm.sh --silence-weight 0.5 --nj 50 --cmd "$train_cmd" \
-    700 data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_dubm
+    700 data/train_nodup data/lang exp/tri4_ali exp/tri4_dubm
 
   steps/train_mmi_fmmi.sh --learning-rate 0.005 \
     --boost 0.1 --cmd "$train_cmd" \
-    data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_dubm \
+    data/train_nodup data/lang exp/tri4_ali exp/tri4_dubm \
     exp/tri4_denlats_nodup exp/tri4_fmmi_b0.1
   (
     for iter in 4 5 6 7 8; do
@@ -320,15 +320,15 @@ fi
 
 # SGMM2 Training & Decoding from timit
 if [[ $STAGE -le 50 ]]; then
-  # exp/tri3_ali +> tri4_ali_nodup
+  # exp/tri3_ali +> tri4_ali
   # exp/ubm4 => tri4_dubm
   # sgmm2_4 => tri4_sgmm2
   steps/train_ubm.sh --cmd "$train_cmd" $numGaussUBM data/train_nodup data/lang \
-    exp/tri4_ali_nodup exp/tri4_ubm
+    exp/tri4_ali exp/tri4_ubm
 
   # steps/train_sgmm2.sh is old version
   steps/train_sgmm2_group.sh --cmd "$train_cmd" $numLeavesSGMM $numGaussSGMM \
-   data/train_nodup data/lang exp/tri4_ali_nodup exp/tri4_ubm/final.ubm exp/tri4_sgmm2
+   data/train_nodup data/lang exp/tri4_ali exp/tri4_ubm/final.ubm exp/tri4_sgmm2
 
   (
     graph_dir=exp/tri4_sgmm2/graph
@@ -352,20 +352,20 @@ fi
 
 # MMI + SGMM2 Training & Decoding from timit
 if [[ $STAGE -le 51 ]]; then
-  # exp/tri3_ali +> tri4_ali_nodup
+  # exp/tri3_ali +> tri4_ali
   # exp/ubm4 => tri4_dubm
   # sgmm2_4 => tri4_sgmm2
   steps/align_sgmm2.sh --nj 50 --cmd "$train_cmd" \
-   --transform-dir exp/tri4_ali_nodup --use-graphs true --use-gselect true \
+   --transform-dir exp/tri4_ali --use-graphs true --use-gselect true \
    data/train_nodup data/lang exp/tri4_sgmm2 exp/tri4_sgmm2_ali
 
   steps/make_denlats_sgmm2.sh --nj 50 --sub-split 30 \
    --acwt 0.2 --lattice-beam 6.0 --beam 9.0 \
-   --cmd "$decode_cmd" --transform-dir exp/tri4_ali_nodup \
+   --cmd "$decode_cmd" --transform-dir exp/tri4_ali \
    data/train_nodup data/lang exp/tri4_sgmm2_ali exp/tri4_sgmm2_denlats
 
   steps/train_mmi_sgmm2.sh --acwt 0.2 --cmd "$decode_cmd" \
-   --transform-dir exp/tri4_ali_nodup --boost 0.1 --drop-frames true \
+   --transform-dir exp/tri4_ali --boost 0.1 --drop-frames true \
    data/train_nodup data/lang exp/tri4_sgmm2_ali exp/tri4_sgmm2_denlats exp/tri4_sgmm2_mmi_b0.1
 
   (
