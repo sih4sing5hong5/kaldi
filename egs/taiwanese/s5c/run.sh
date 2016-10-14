@@ -66,9 +66,11 @@ fi
 if [ $STAGE -le 5 ]; then
   if [ -f bo5-ai3.pio2 ]; then
     cat bo5-ai3.pio2 | grep -vwF -f 無問題的音檔.表 > ai3the7tiau7.pio2
+    cat 有問題的音檔.表 >> ai3the7tiau7.pio2
     for x in data/train_nodev/{text,segments,utt2spk}; do
-      cat $x | grep -vwF -f ai3the7tiau7.pio2 | grep -vwF -f 有問題的音檔.表 > $x.tmp
-      mv $x.tmp $x
+      cat $x | grep -wF -f ai3the7tiau7.pio2 -A 2 -B 2 > $x.tmp
+      cat $x | grep -vwF -f  $x.tmp > $x.tmp2
+      mv $x.tmp2 $x
     done
   fi
 fi
