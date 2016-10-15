@@ -17,8 +17,9 @@ lai5thiann1=`cat $1 | \
   awk '{print $1}' | \
   grep -vwF -f 有問題的音檔.表 | \
   grep -vwF -f 無問題的音檔.表 | \
+  gshuf -n 50 |\
   sort | \
-  gshuf -n 50`
+  cat`
 
 for i in $lai5thiann1; do
   bash 揣聲音.sh $i
