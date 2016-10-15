@@ -23,10 +23,10 @@ for i in $lai5thiann1; do
   bash 揣聲音.sh $i
 	while true ; do
     read -p "e好，f無好?" yn
-    if [ $yn = "e" ]; then
+    if [ "$yn" = "e" ]; then
       echo "$i" >> 無問題的音檔.表
       break
-    elif  [ $yn = "f" ]; then
+    elif  [ "$yn" = "f" ]; then
       echo "$i" >> 有問題的音檔.表
       break
     else
