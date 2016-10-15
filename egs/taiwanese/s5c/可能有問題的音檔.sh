@@ -13,6 +13,6 @@ if [ $# -eq 0 ]; then
 else
   cat king3ko3.pio2 | \
     awk -v liong7=$1 '{if($1>=liong7)print $2}' | \
-    cat >> bo5-ai3.pio2
+    cat > bo5-ai3.pio2
 fi
 
