@@ -69,11 +69,11 @@ if [ $STAGE -le 5 ]; then
     for x in data/train_nodev/{text,segments,utt2spk}; do
 		cat $x | grep -wF -f ai3the7tiau7.pio2 | \
         grep -vwF -f 無問題的音檔.表 > $x.bo
-      for i in 1 2; do
-		  cat $x | grep -wF -f $x.bo -A 1 -B 1 | \
-		    grep -vwF -f 無問題的音檔.表 > $x.bo5
-		  mv $x.bo5 $x.bo
-		done
+      #for i in 1 2 3; do
+		#  cat $x | grep -wF -f $x.bo -A 1 -B 1 | \
+		#    grep -vwF -f 無問題的音檔.表 > $x.bo5
+		#  mv $x.bo5 $x.bo
+		#done
       cat $x | grep -vwF -f  $x.bo > $x.tmp
       mv $x.tmp $x
     done
