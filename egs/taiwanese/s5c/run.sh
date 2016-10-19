@@ -59,6 +59,7 @@ if [ $STAGE -le 4 ]; then
   # the 1st 10k sentences as dev set, so the 1st 4k won't have been used in the
   # LM training data.   However, they will be in the lexicon, plus speakers
   # may overlap, so it's still not quite equivalent to a test set.
+  rm -rf train_dev train_nodev
   utils/subset_data_dir.sh --first data/train 4000 data/train_dev # 5hr 6min
   n=$[`cat data/train/segments | wc -l` - 4000]
   utils/subset_data_dir.sh --last data/train $n data/train_nodev
@@ -67,7 +68,7 @@ fi
 if [ $STAGE -le 5 ]; then
   if [ -f 有問題的音檔.表 ]; then
     cat 有問題的音檔.表 > ai3the7tiau7.pio2
-    for x in data/train_nodev/{text,segments,utt2spk}; do
+    for x in data/train_nodev/utt2spk; do
 		cat $x | grep -wF -f ai3the7tiau7.pio2 | \
         grep -vwF -f 無問題的音檔.表 > $x.bo
       #for i in 1 2 3; do
