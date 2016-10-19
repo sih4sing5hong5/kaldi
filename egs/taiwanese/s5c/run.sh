@@ -33,6 +33,7 @@ if [ $STAGE -le 1 ]; then
 fi
 
 if [ $STAGE -le 2 ]; then
+  rm -rf data/lang
   utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
 fi
 
