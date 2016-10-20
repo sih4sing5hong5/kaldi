@@ -34,23 +34,15 @@ fi
 
 if [ $STAGE -le 2 ]; then
   rm -rf data/lang
-  utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang
+  utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang_dict
 fi
 
 LM='data/local/lm/語言模型.lm'
+LM_GZ='data/local/lm/語言模型.lm.gz'
 # # Now train the language models.
 if [ $STAGE -le 3 ]; then
-  # # Compiles G for trigram LM
-  cat $LM | utils/find_arpa_oovs.pl data/lang/words.txt  > data/lang/arpa_oov.txt
-  cat $LM | \
-      grep -v '<s> <s>' | \
-      grep -v '</s> <s>' | \
-      grep -v '</s> </s>' | \
-      arpa2fst - | fstprint | \
-      utils/remove_oovs.pl data/lang/arpa_oov.txt | \
-      utils/eps2disambig.pl | utils/s2eps.pl | fstcompile --isymbols=data/lang/words.txt \
-        --osymbols=data/lang/words.txt  --keep_isymbols=false --keep_osymbols=false | \
-       fstrmepsilon | fstarcsort > data/lang/G.fst
+  cat $LM | gzip > $LM_GZ
+  utils/format_lm.sh data/lang_dict $LM_GZ data/local/dict/lexicon.txt data/lang
 fi
 
 # Split corpus for test and mono_train
@@ -185,18 +177,9 @@ if [ $STAGE -le 14 ]; then
     data/local/dict exp/tri3/pron_counts_nowb.txt exp/tri3/sil_counts_nowb.txt \
     exp/tri3/pron_bigram_counts_nowb.txt data/local/dict_sp
   # Like stage 2
-  utils/prepare_lang.sh data/local/dict_sp "<UNK>"  data/local/lang_sp data/lang_sp
+  utils/prepare_lang.sh data/local/dict_sp "<UNK>"  data/local/lang_sp data/lang_dict_sp
   # Like stage 3
-  cat $LM | utils/find_arpa_oovs.pl data/lang_sp/words.txt  > data/lang_sp/arpa_oov.txt
-  cat $LM | \
-      grep -v '<s> <s>' | \
-      grep -v '</s> <s>' | \
-      grep -v '</s> </s>' | \
-      arpa2fst - | fstprint | \
-      utils/remove_oovs.pl data/lang_sp/arpa_oov.txt | \
-      utils/eps2disambig.pl | utils/s2eps.pl | fstcompile --isymbols=data/lang_sp/words.txt \
-        --osymbols=data/lang_sp/words.txt  --keep_isymbols=false --keep_osymbols=false | \
-       fstrmepsilon | fstarcsort > data/lang_sp/G.fst
+  utils/format_lm.sh data/lang_dict_sp $LM_GZ data/local/dict_sp/lexicon.txt data/lang_sp
 
   (
     graph_dir=exp/tri3/graph_sp
