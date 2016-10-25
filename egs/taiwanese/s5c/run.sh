@@ -223,12 +223,12 @@ if [ $STAGE -le 16 ]; then
 
   steps/make_denlats.sh --nj 50 --cmd "$decode_cmd" \
     --config conf/decode.config --transform-dir exp/tri4_ali \
-    data/train_nodup data/lang exp/tri4 exp/tri4_denlats_nodup
+    data/train_nodup data/lang exp/tri4 exp/tri4_denlats
 fi
 
 # Do MPE from voxforge
 if [[ $STAGE -le 20 ]]; then
-  steps/train_mpe.sh data/train_nodup data/lang exp/tri4_ali exp/tri4_denlats_nodup exp/tri4_mpe
+  steps/train_mpe.sh data/train_nodup data/lang exp/tri4_ali exp/tri4_denlats exp/tri4_mpe
   (
     for iter in 1 2 3 4; do
       graph_dir=exp/tri4/graph
@@ -255,7 +255,7 @@ if [ $STAGE -le 30 ]; then
   num_mmi_iters=4
   steps/train_mmi.sh --cmd "$decode_cmd" \
     --boost 0.1 --num-iters $num_mmi_iters \
-    data/train_nodup data/lang exp/tri4_{ali,denlats}_nodup exp/tri4_mmi_b0.1
+    data/train_nodup data/lang exp/tri4_{ali,denlats} exp/tri4_mmi_b0.1
 
   (
     for iter in 1 2 3 4; do
@@ -287,7 +287,7 @@ if [ $STAGE -le 40 ]; then
   steps/train_mmi_fmmi.sh --learning-rate 0.005 \
     --boost 0.1 --cmd "$train_cmd" \
     data/train_nodup data/lang exp/tri4_ali exp/tri4_dubm \
-    exp/tri4_denlats_nodup exp/tri4_fmmi_b0.1
+    exp/tri4_denlats exp/tri4_fmmi_b0.1
   (
     for iter in 4 5 6 7 8; do
       graph_dir=exp/tri4/graph
