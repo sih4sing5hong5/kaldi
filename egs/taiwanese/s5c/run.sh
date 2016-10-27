@@ -216,8 +216,38 @@ if [ $STAGE -le 15 ]; then
   )
 fi
 
-# Prepare tri4_ali for other training
 if [ $STAGE -le 16 ]; then
+  steps/cleanup/clean_and_segment_data.sh \
+    --nj 30 \
+    data/train_nodup data/lang_sp exp/tri4 exp/tri4_cleanup data/train_nodup_cleaned
+fi
+
+if [ $STAGE -le 17 ]; then
+  utils/split_data.sh data/train_nodup_cleaned/ 50
+  steps/align_fmllr.sh --nj 50 --cmd "$train_cmd" \
+		data/train_nodup_cleaned data/lang_sp exp/tri4 exp/tri4_ali
+  steps/train_sat.sh  --cmd "$train_cmd" \
+    11500 200000 data/train_nodup_cleaned data/lang_sp exp/tri4_ali exp/tri5
+  (
+    graph_dir=exp/tri5/graph
+    $train_cmd $graph_dir/mkgraph.log \
+      utils/mkgraph.sh data/lang exp/tri5 $graph_dir
+    steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
+      --config conf/decode.config \
+      $graph_dir data/train_dev exp/tri5/decode_train_dev
+  )
+  (
+    graph_dir=exp/tri5/graph_sp
+    $train_cmd $graph_dir/mkgraph.log \
+      utils/mkgraph.sh data/lang_sp exp/tri5 $graph_dir
+    steps/decode_fmllr.sh --nj 30 --cmd "$decode_cmd" \
+      --config conf/decode.config \
+      $graph_dir data/train_dev exp/tri5/decode_train_dev_sp
+  )
+fi
+exit 0
+# Prepare tri4_ali for other training
+if [ $STAGE -le 19 ]; then
   steps/align_fmllr.sh --nj 50 --cmd "$train_cmd" \
     data/train_nodup data/lang exp/tri4 exp/tri4_ali
 
