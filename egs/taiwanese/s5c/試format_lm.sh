@@ -7,24 +7,20 @@
 
 set -e # exit on error
 
+if [ $# -ne 1 ]; then
+  echo "$0 arpa"
+  exit 1
+fi
+
 # # Now train the language models.
-LM='tshi3/lang/語言模型.lm'
+LM=$1
+LM_GZ='tshi3/local/lm/format_lm.arpa.gz'
+mkdir -p 'tshi3/local/lm/'
 
-LANG_DIR='tshi3/lang_new_g'
+LANG_DIR='tshi3/lang_format_lm'
 
-utils/prepare_lang.sh tshi3/local/dict "<UNK>"  tshi3/local/lang $LANG_DIR
-
-cat $LM | utils/find_arpa_oovs.pl $LANG_DIR/words.txt  > $LANG_DIR/arpa_oov.txt
-cat $LM | \
-  grep -v '<s> <s>' | \
-  grep -v '</s> <s>' | \
-  grep -v '</s> </s>' | \
-  arpa2fst - | fstprint | \
-  utils/remove_oovs.pl $LANG_DIR/arpa_oov.txt | \
-  utils/eps2disambig.pl | utils/s2eps.pl | fstcompile --isymbols=$LANG_DIR/words.txt \
-    --osymbols=$LANG_DIR/words.txt  --keep_isymbols=false --keep_osymbols=false | \
-   fstrmepsilon | fstarcsort --sort_type=ilabel > $LANG_DIR/G.fst
-utils/validate_lang.pl --skip-determinization-check $LANG_DIR
+cat $LM | gzip > $LM_GZ
+utils/format_lm.sh data/lang $LM_GZ data/local/dict/lexicon.txt $LANG_DIR
 
 tshi3='tshi3/train'
 (
