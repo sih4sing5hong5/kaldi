@@ -7,23 +7,72 @@ exp/tri3/decode_train_dev:
 exp/tri3/decode_train_dev_sp:
 %WER 87.63 [ 19271 / 21991, 1283 ins, 5491 del, 12497 sub ] 
 exp/tri4/decode_train_dev:
-%WER 86.13 [ 18941 / 21991, 1093 ins, 5882 del, 11966 sub ] 
+%WER 85.46 [ 18794 / 21991, 1057 ins, 6141 del, 11596 sub ] 
 exp/tri4/decode_train_dev.si:
-%WER 88.79 [ 19525 / 21991, 984 ins, 6444 del, 12097 sub ] 
+%WER 88.10 [ 19373 / 21991, 834 ins, 6938 del, 11601 sub ] 
 exp/tri4/decode_train_dev_sp:
-%WER 85.01 [ 18694 / 21991, 1220 ins, 5405 del, 12069 sub ] 
+%WER 83.53 [ 18368 / 21991, 1061 ins, 5643 del, 11664 sub ] 
 exp/tri4/decode_train_dev_sp.si:
-%WER 87.84 [ 19316 / 21991, 1099 ins, 5907 del, 12310 sub ] 
+%WER 86.23 [ 18963 / 21991, 817 ins, 6465 del, 11681 sub ] 
 exp/tri5/decode_train_dev:
 %WER 85.46 [ 18794 / 21991, 1057 ins, 6141 del, 11596 sub ] 
 exp/tri5/decode_train_dev.si:
 %WER 88.10 [ 19373 / 21991, 834 ins, 6938 del, 11601 sub ] 
 exp/tri5/decode_train_dev_sp:
-%WER 84.28 [ 18535 / 21991, 1069 ins, 5912 del, 11554 sub ] 
+%WER 83.53 [ 18368 / 21991, 1061 ins, 5643 del, 11664 sub ] 
 exp/tri5/decode_train_dev_sp.si:
-%WER 86.94 [ 19119 / 21991, 922 ins, 6448 del, 11749 sub ] 
-exp/tri4_mpe/decode_train_dev*:
-exp/tri4_mmi_b0.1/decode_train_dev*:
-exp/tri4_fmmi_b0.1/decode_train_dev*:
+%WER 86.23 [ 18963 / 21991, 817 ins, 6465 del, 11681 sub ] 
+exp/tri4_mpe/decode_train_dev_it1:
+%WER 82.75 [ 18198 / 21991, 864 ins, 6016 del, 11318 sub ] 
+exp/tri4_mpe/decode_train_dev_it2:
+%WER 82.10 [ 18054 / 21991, 866 ins, 5922 del, 11266 sub ] 
+exp/tri4_mpe/decode_train_dev_it3:
+%WER 81.34 [ 17887 / 21991, 828 ins, 5910 del, 11149 sub ] 
+exp/tri4_mpe/decode_train_dev_it4:
+%WER 81.11 [ 17838 / 21991, 859 ins, 5711 del, 11268 sub ] 
+exp/tri4_mpe/decode_train_dev_sp_it1:
+%WER 81.66 [ 17957 / 21991, 945 ins, 5605 del, 11407 sub ] 
+exp/tri4_mpe/decode_train_dev_sp_it2:
+%WER 81.05 [ 17824 / 21991, 971 ins, 5456 del, 11397 sub ] 
+exp/tri4_mpe/decode_train_dev_sp_it3:
+%WER 80.27 [ 17653 / 21991, 933 ins, 5388 del, 11332 sub ] 
+exp/tri4_mpe/decode_train_dev_sp_it4:
+%WER 80.14 [ 17623 / 21991, 972 ins, 5198 del, 11453 sub ] 
+exp/tri4_mmi_b0.1/decode_train_dev_it1:
+%WER 83.94 [ 18459 / 21991, 898 ins, 6110 del, 11451 sub ] 
+exp/tri4_mmi_b0.1/decode_train_dev_it2:
+%WER 83.33 [ 18325 / 21991, 881 ins, 6021 del, 11423 sub ] 
+exp/tri4_mmi_b0.1/decode_train_dev_it3:
+%WER 83.23 [ 18303 / 21991, 899 ins, 5950 del, 11454 sub ] 
+exp/tri4_mmi_b0.1/decode_train_dev_it4:
+%WER 83.14 [ 18284 / 21991, 894 ins, 5847 del, 11543 sub ] 
+exp/tri4_mmi_b0.1/decode_train_dev_sp_it1:
+%WER 82.33 [ 18105 / 21991, 965 ins, 5665 del, 11475 sub ] 
+exp/tri4_mmi_b0.1/decode_train_dev_sp_it2:
+%WER 82.05 [ 18043 / 21991, 992 ins, 5521 del, 11530 sub ] 
+exp/tri4_mmi_b0.1/decode_train_dev_sp_it3:
+%WER 82.03 [ 18040 / 21991, 1014 ins, 5402 del, 11624 sub ] 
+exp/tri4_mmi_b0.1/decode_train_dev_sp_it4:
+%WER 82.20 [ 18076 / 21991, 1061 ins, 5290 del, 11725 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_it4:
+%WER 84.21 [ 18519 / 21991, 967 ins, 6054 del, 11498 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_it5:
+%WER 83.51 [ 18365 / 21991, 874 ins, 6039 del, 11452 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_it6:
+%WER 83.26 [ 18309 / 21991, 897 ins, 5981 del, 11431 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_it7:
+%WER 83.26 [ 18310 / 21991, 891 ins, 5866 del, 11553 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_it8:
+%WER 82.92 [ 18236 / 21991, 905 ins, 5728 del, 11603 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_sp_it4:
+%WER 82.58 [ 18161 / 21991, 1013 ins, 5618 del, 11530 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_sp_it5:
+%WER 81.92 [ 18016 / 21991, 961 ins, 5609 del, 11446 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_sp_it6:
+%WER 81.87 [ 18004 / 21991, 1000 ins, 5459 del, 11545 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_sp_it7:
+%WER 81.80 [ 17988 / 21991, 1009 ins, 5295 del, 11684 sub ] 
+exp/tri4_fmmi_b0.1/decode_train_dev_sp_it8:
+%WER 81.89 [ 18009 / 21991, 1083 ins, 5152 del, 11774 sub ] 
 exp/tri4_sgmm2/decode_train_dev*:
 exp/tri4_sgmm2_mmi_b0.1/decode_train_dev*:

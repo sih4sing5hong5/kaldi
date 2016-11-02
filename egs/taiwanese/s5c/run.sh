@@ -246,7 +246,7 @@ if [ $STAGE -le 17 ]; then
       $graph_dir data/train_dev exp/tri5/decode_train_dev_sp
   )
 fi
-exit 0
+
 # Prepare tri4_ali for other training
 if [ $STAGE -le 19 ]; then
   steps/align_fmllr.sh --nj $nj --cmd "$train_cmd" \
