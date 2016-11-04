@@ -20,7 +20,7 @@ mkdir -p 'tshi3/local/lm/'
 LANG_DIR='tshi3/lang_format_lm'
 
 cat $LM | gzip > $LM_GZ
-utils/format_lm.sh data/lang $LM_GZ data/local/dict/lexicon.txt $LANG_DIR
+utils/format_lm.sh data/lang_sp $LM_GZ data/local/dict/lexicon.txt $LANG_DIR
 
 tshi3='tshi3/train'
 (
@@ -36,17 +36,17 @@ tshi3='tshi3/train'
    $tshi3 $make_mfcc_dir $mfccdir
   steps/compute_cmvn_stats.sh $tshi3 $make_mfcc_dir $mfccdir
 )
-graph_dir=exp/tri4/graph_new_g
+graph_dir=exp/tri4/graph_format_lm
 $train_cmd $graph_dir/mkgraph.log \
   utils/mkgraph.sh $LANG_DIR exp/tri4 $graph_dir
 (
   steps/decode_fmllr.sh --nj 1 --cmd "$decode_cmd" \
     --config conf/decode.config \
-    $graph_dir $tshi3 exp/tri4/decode_new_g
+    $graph_dir $tshi3 exp/tri4/decode_format_lm
 )
 (
   steps/decode.sh --nj 1 --cmd "$decode_cmd" \
     --config conf/decode.config \
     --iter 4 \
-    $graph_dir $tshi3 exp/tri4_mpe/decode_new_g
+    $graph_dir $tshi3 exp/tri4_mpe/decode_format_lm
 )
