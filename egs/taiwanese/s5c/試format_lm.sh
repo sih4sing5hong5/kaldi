@@ -28,8 +28,8 @@ tshi3='tshi3/train'
 
   utils/fix_data_dir.sh $tshi3
 
-  mfccdir=tshi3/mfcc
-  make_mfcc_dir=exp/make_mfcc/tshi3
+  mfccdir=tshi3/mfcc/format_lm
+  make_mfcc_dir=exp/make_mfcc/tshi3_format_lm
   rm -rf $mfccdir $make_mfcc_dir
 
   steps/make_mfcc.sh --nj 4 --cmd "$train_cmd" \
