@@ -53,7 +53,8 @@ if [ $STAGE -le 4 ]; then
   # LM training data.   However, they will be in the lexicon, plus speakers
   # may overlap, so it's still not quite equivalent to a test set.
   rm -rf data/train_dev data/train_nodev
-  utils/subset_data_dir.sh --first data/train 4000 data/train_dev # 5hr 6min
+  #utils/subset_data_dir.sh --first data/train 4000 data/train_dev # 5hr 6min
+  ln -s ../tshi3/train data/train_dev
   n=$[`cat data/train/segments | wc -l` - 4000]
   utils/subset_data_dir.sh --last data/train $n data/train_nodev
 fi
