@@ -139,10 +139,6 @@ if [ $STAGE -le 12 ]; then
     4000 70000 data/train_100k_nodup data/lang exp/tri1_ali exp/tri2
 
   (
-    # The previous mkgraph might be writing to this file.  If the previous mkgraph
-    # is not running, you can remove this loop and this mkgraph will create it.
-    while [ ! -s data/lang/tmp/CLG_3_1.fst ]; do sleep 60; done
-    sleep 20; # in case still writing.
     graph_dir=exp/tri2/graph
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh data/lang exp/tri2 $graph_dir
