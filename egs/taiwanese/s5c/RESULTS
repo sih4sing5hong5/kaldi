@@ -1,83 +1,83 @@
 exp/tri1/decode_train_dev:
-%WER 96.32 [ 811 / 842, 27 ins, 330 del, 454 sub ] 
+%WER 96.12 [ 1091 / 1135, 35 ins, 443 del, 613 sub ] 
 exp/tri2/decode_train_dev:
-%WER 95.13 [ 801 / 842, 27 ins, 329 del, 445 sub ] 
+%WER 96.56 [ 1096 / 1135, 32 ins, 399 del, 665 sub ] 
 exp/tri3/decode_train_dev:
-%WER 75.53 [ 636 / 842, 22 ins, 261 del, 353 sub ] 
+%WER 91.81 [ 1042 / 1135, 20 ins, 407 del, 615 sub ] 
 exp/tri3/decode_train_dev_sp:
-%WER 75.42 [ 635 / 842, 25 ins, 265 del, 345 sub ] 
+%WER 91.81 [ 1042 / 1135, 28 ins, 466 del, 548 sub ] 
 exp/tri4/decode_train_dev:
-%WER 71.85 [ 605 / 842, 10 ins, 345 del, 250 sub ] 
+%WER 93.13 [ 1057 / 1135, 16 ins, 628 del, 413 sub ] 
 exp/tri4/decode_train_dev.si:
-%WER 76.96 [ 648 / 842, 18 ins, 323 del, 307 sub ] 
+%WER 90.31 [ 1025 / 1135, 14 ins, 480 del, 531 sub ] 
 exp/tri4/decode_train_dev_sp:
-%WER 71.38 [ 601 / 842, 14 ins, 345 del, 242 sub ] 
+%WER 93.83 [ 1065 / 1135, 16 ins, 676 del, 373 sub ] 
 exp/tri4/decode_train_dev_sp.si:
-%WER 75.42 [ 635 / 842, 21 ins, 304 del, 310 sub ] 
+%WER 91.54 [ 1039 / 1135, 27 ins, 442 del, 570 sub ] 
 exp/tri5/decode_train_dev:
-%WER 73.04 [ 615 / 842, 14 ins, 309 del, 292 sub ] 
+%WER 93.30 [ 1059 / 1135, 11 ins, 686 del, 362 sub ] 
 exp/tri5/decode_train_dev.si:
-%WER 76.37 [ 643 / 842, 11 ins, 309 del, 323 sub ] 
+%WER 90.93 [ 1032 / 1135, 17 ins, 400 del, 615 sub ] 
 exp/tri5/decode_train_dev_sp:
-%WER 71.62 [ 603 / 842, 11 ins, 319 del, 273 sub ] 
+%WER 93.74 [ 1064 / 1135, 17 ins, 654 del, 393 sub ] 
 exp/tri5/decode_train_dev_sp.si:
-%WER 76.60 [ 645 / 842, 21 ins, 283 del, 341 sub ] 
+%WER 91.37 [ 1037 / 1135, 33 ins, 375 del, 629 sub ] 
 exp/tri4_mpe/decode_train_dev_it1:
-%WER 68.65 [ 578 / 842, 14 ins, 295 del, 269 sub ] 
+%WER 92.25 [ 1047 / 1135, 18 ins, 583 del, 446 sub ] 
 exp/tri4_mpe/decode_train_dev_it2:
-%WER 67.22 [ 566 / 842, 14 ins, 312 del, 240 sub ] 
+%WER 93.22 [ 1058 / 1135, 22 ins, 584 del, 452 sub ] 
 exp/tri4_mpe/decode_train_dev_it3:
-%WER 66.63 [ 561 / 842, 12 ins, 319 del, 230 sub ] 
+%WER 93.57 [ 1062 / 1135, 23 ins, 595 del, 444 sub ] 
 exp/tri4_mpe/decode_train_dev_it4:
-%WER 65.08 [ 548 / 842, 8 ins, 313 del, 227 sub ] 
+%WER 94.01 [ 1067 / 1135, 24 ins, 606 del, 437 sub ] 
 exp/tri4_mpe/decode_train_dev_sp_it1:
-%WER 67.58 [ 569 / 842, 12 ins, 301 del, 256 sub ] 
+%WER 93.22 [ 1058 / 1135, 18 ins, 632 del, 408 sub ] 
 exp/tri4_mpe/decode_train_dev_sp_it2:
-%WER 66.86 [ 563 / 842, 12 ins, 319 del, 232 sub ] 
+%WER 94.19 [ 1069 / 1135, 26 ins, 577 del, 466 sub ] 
 exp/tri4_mpe/decode_train_dev_sp_it3:
-%WER 66.98 [ 564 / 842, 12 ins, 323 del, 229 sub ] 
+%WER 94.10 [ 1068 / 1135, 14 ins, 705 del, 349 sub ] 
 exp/tri4_mpe/decode_train_dev_sp_it4:
-%WER 65.91 [ 555 / 842, 12 ins, 315 del, 228 sub ] 
+%WER 94.27 [ 1070 / 1135, 18 ins, 668 del, 384 sub ] 
 exp/tri4_mmi_b0.1/decode_train_dev_it1:
-%WER 69.71 [ 587 / 842, 14 ins, 337 del, 236 sub ] 
+%WER 92.86 [ 1054 / 1135, 18 ins, 584 del, 452 sub ] 
 exp/tri4_mmi_b0.1/decode_train_dev_it2:
-%WER 68.88 [ 580 / 842, 10 ins, 348 del, 222 sub ] 
+%WER 94.27 [ 1070 / 1135, 16 ins, 637 del, 417 sub ] 
 exp/tri4_mmi_b0.1/decode_train_dev_it3:
-%WER 67.34 [ 567 / 842, 10 ins, 354 del, 203 sub ] 
+%WER 95.07 [ 1079 / 1135, 10 ins, 726 del, 343 sub ] 
 exp/tri4_mmi_b0.1/decode_train_dev_it4:
-%WER 66.86 [ 563 / 842, 13 ins, 360 del, 190 sub ] 
+%WER 95.68 [ 1086 / 1135, 11 ins, 760 del, 315 sub ] 
 exp/tri4_mmi_b0.1/decode_train_dev_sp_it1:
-%WER 69.12 [ 582 / 842, 13 ins, 342 del, 227 sub ] 
+%WER 93.74 [ 1064 / 1135, 10 ins, 682 del, 372 sub ] 
 exp/tri4_mmi_b0.1/decode_train_dev_sp_it2:
-%WER 70.19 [ 591 / 842, 12 ins, 357 del, 222 sub ] 
+%WER 94.80 [ 1076 / 1135, 11 ins, 775 del, 290 sub ] 
 exp/tri4_mmi_b0.1/decode_train_dev_sp_it3:
-%WER 68.05 [ 573 / 842, 10 ins, 365 del, 198 sub ] 
+%WER 95.24 [ 1081 / 1135, 15 ins, 728 del, 338 sub ] 
 exp/tri4_mmi_b0.1/decode_train_dev_sp_it4:
-%WER 67.70 [ 570 / 842, 12 ins, 365 del, 193 sub ] 
+%WER 95.77 [ 1087 / 1135, 13 ins, 761 del, 313 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_it4:
-%WER 73.63 [ 620 / 842, 9 ins, 381 del, 230 sub ] 
+%WER 93.39 [ 1060 / 1135, 19 ins, 656 del, 385 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_it5:
-%WER 71.97 [ 606 / 842, 10 ins, 381 del, 215 sub ] 
+%WER 94.45 [ 1072 / 1135, 11 ins, 713 del, 348 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_it6:
-%WER 70.43 [ 593 / 842, 7 ins, 389 del, 197 sub ] 
+%WER 95.15 [ 1080 / 1135, 9 ins, 745 del, 326 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_it7:
-%WER 69.60 [ 586 / 842, 8 ins, 404 del, 174 sub ] 
+%WER 95.86 [ 1088 / 1135, 12 ins, 741 del, 335 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_it8:
-%WER 68.17 [ 574 / 842, 6 ins, 400 del, 168 sub ] 
+%WER 96.12 [ 1091 / 1135, 12 ins, 755 del, 324 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_sp_it4:
-%WER 72.92 [ 614 / 842, 10 ins, 382 del, 222 sub ] 
+%WER 94.89 [ 1077 / 1135, 12 ins, 768 del, 297 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_sp_it5:
-%WER 72.09 [ 607 / 842, 8 ins, 399 del, 200 sub ] 
+%WER 94.80 [ 1076 / 1135, 8 ins, 794 del, 274 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_sp_it6:
-%WER 71.62 [ 603 / 842, 8 ins, 412 del, 183 sub ] 
+%WER 95.95 [ 1089 / 1135, 13 ins, 773 del, 303 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_sp_it7:
-%WER 69.71 [ 587 / 842, 9 ins, 408 del, 170 sub ] 
+%WER 96.12 [ 1091 / 1135, 14 ins, 773 del, 304 sub ] 
 exp/tri4_fmmi_b0.1/decode_train_dev_sp_it8:
-%WER 69.36 [ 584 / 842, 10 ins, 410 del, 164 sub ] 
+%WER 96.12 [ 1091 / 1135, 10 ins, 787 del, 294 sub ] 
 exp/tri4_sgmm2/decode_train_dev:
-%WER 87.89 [ 740 / 842, 17 ins, 323 del, 400 sub ] 
+%WER 92.25 [ 1047 / 1135, 31 ins, 402 del, 614 sub ] 
 exp/tri4_sgmm2/decode_train_dev_sp:
-%WER 88.24 [ 743 / 842, 23 ins, 314 del, 406 sub ] 
+%WER 93.13 [ 1057 / 1135, 43 ins, 384 del, 630 sub ] 
 exp/tri4_sgmm2_mmi_b0.1/decode_train_dev_it1:
 %WER 86.94 [ 732 / 842, 14 ins, 334 del, 384 sub ] 
 exp/tri4_sgmm2_mmi_b0.1/decode_train_dev_it2:
