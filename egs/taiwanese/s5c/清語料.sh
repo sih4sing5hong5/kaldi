@@ -3,11 +3,11 @@ set -e
 . path.sh
 
 nj=30
-ku=data/train_tri5_cleaned
-mo_ku=data/tri5
+ku=data/train_nodup_cleaned
+mo_ku=exp/tri5
 
 for i in 1 2 3; do 
-  sin=data/train_tri5_cleaned.$i
+  sin=data/train_nodup_cleaned.$i
   mo_sin=exp/tri5.$i
   steps/cleanup/clean_and_segment_data.sh \
     --nj $nj \
