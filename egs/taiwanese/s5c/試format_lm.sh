@@ -55,3 +55,14 @@ $train_cmd $graph_dir/mkgraph.log \
     --config conf/decode.config \
     $graph_dir $tshi3 exp/tri5/decode_format_lm
 )
+for i in 1 2 3 4 5; do
+graph_dir=exp/tri5.$i/graph_format_lm
+rm -rf $graph_dir
+$train_cmd $graph_dir/mkgraph.log \
+  utils/mkgraph.sh $LANG_DIR exp/tri5.$i $graph_dir
+(
+  steps/decode_fmllr.sh --nj 16 --cmd "$decode_cmd" \
+    --config conf/decode.config \
+    $graph_dir $tshi3 exp/tri5.$i/decode_format_lm
+)
+done
