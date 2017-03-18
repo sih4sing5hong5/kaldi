@@ -15,7 +15,7 @@ fi
 echo "stage = $STAGE"
 
 
-nj=30
+nj=16
 # Acoustic model parameters
 numLeavesTri1=2500
 numGaussTri1=15000
@@ -223,7 +223,7 @@ fi
 if [ $STAGE -le 17 ]; then
   #utils/split_data.sh data/train_nodup_cleaned/ $nj
   steps/align_fmllr.sh --nj $nj --cmd "$train_cmd" \
-		data/train_nodup_cleaned data/lang_sp exp/tri4 exp/tri4_ali
+    data/train_nodup_cleaned data/lang_sp exp/tri4 exp/tri4_ali
   steps/train_sat.sh  --cmd "$train_cmd" \
     11500 200000 data/train_nodup_cleaned data/lang_sp exp/tri4_ali exp/tri5
   (
@@ -242,6 +242,9 @@ if [ $STAGE -le 17 ]; then
       --config conf/decode.config \
       $graph_dir data/train_dev exp/tri5/decode_train_dev_sp
   )
+fi
+if [ $STAGE -le 18 ]; then
+  清語料.sh
 fi
 
 # Prepare tri4_ali for other training
