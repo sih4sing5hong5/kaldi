@@ -7,9 +7,12 @@
 
 set -e # exit on error
 
-tshi3=$2
-tshi3='tui3tse5/train'
-lang='tui3tse5/lang_dict'
+data=$1
+model=$2
+giap8=$3
+
+tshi3="${giap8}/train"
+lang="${giap8}/lang_dict"
 (
   utils/utt2spk_to_spk2utt.pl $tshi3/utt2spk > $tshi3/spk2utt
 
@@ -23,10 +26,10 @@ lang='tui3tse5/lang_dict'
   steps/compute_cmvn_stats.sh $tshi3 $make_mfcc_dir $mfccdir
 )
 
-cp data/local/dict/[^l]* tui3tse5/local/dict
-utils/prepare_lang.sh tui3tse5/local/dict "<UNK>"  tui3tse5/local/lang $lang
+cp ${data}/[^l]* "${giap8}/local/dict"
+utils/prepare_lang.sh "${giap8}/local/dict" "<UNK>"  "${giap8}/local/lang" $lang
 
 steps/align_fmllr.sh --beam 100 --retry-beam 150 --nj 1 --cmd "$train_cmd" \
-  $tshi3 $lang exp/tri5.2 exp/tui3tse5_ali
+  $tshi3 $lang $model "${giap8}/ali"
 
-steps/get_train_ctm.sh $tshi3 $lang exp/tui3tse5_ali
+steps/get_train_ctm.sh $tshi3 $lang "${giap8}/ali"
