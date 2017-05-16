@@ -423,6 +423,31 @@ fi
 # Dan's nnet recipe
 # local/nnet2/run_nnet2.sh --has-fisher $has_fisher
 
+if [[ $STAGE -le 110 ]]; then
+  steps/nnet2/train_pnorm_accel2.sh
+  # --parallel-opts "$parallel_opts"
+    --cmd "$decode_cmd" --stage -10 \
+    --num-threads 1 --minibatch-size 512 \
+    --mix-up 20000 --samples-per-iter 300000 \
+    --num-epochs 15 \
+    --initial-effective-lrate 0.005 --final-effective-lrate 0.0002 \
+    --num-jobs-initial 3 --num-jobs-final 10 --num-hidden-layers 5 \
+    --pnorm-input-dim 5000  --pnorm-output-dim 500 \
+    data/train_nodup data/lang exp/tri5.2_ali exp/nnet2_5
+
+  steps/nnet2/decode.sh --cmd "$decode_cmd" --nj 30 \
+    --config conf/decode.config \
+    --transform-dir exp/tri4/decode_train_dev \
+    exp/tri4/graph data/train_dev \
+    exp/nnet2_5/decode_train_dev
+
+  steps/nnet2/decode.sh --cmd "$decode_cmd" --nj 30 \
+    --config conf/decode.config \
+    --transform-dir exp/tri4/decode_train_dev_sp \
+    exp/tri4/graph_sp data/train_dev \
+    exp/nnet2_5/decode_train_dev
+fi
+
 # Dan's nnet recipe with online decoding.
 # local/online/run_nnet2_ms.sh --has-fisher $has_fisher
 
