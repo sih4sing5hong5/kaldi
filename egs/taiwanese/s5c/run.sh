@@ -244,7 +244,7 @@ if [ $STAGE -le 17 ]; then
   )
 fi
 if [ $STAGE -le 18 ]; then
-  清語料.sh
+  bash 清語料.sh
 fi
 
 # Prepare tri4_ali for other training
