@@ -14,6 +14,7 @@ lang_log=${lang}_log
 nj=1
 
 mkdir -p ${data}/local/free-syllable/dict
+rm -rf ${data}/local/free-syllable/dict/*
 cp ${data}/local/dict/[^l]* ${data}/local/free-syllable/dict
 cp ${data}/local/free-syllable/lexicon.txt ${data}/local/free-syllable/dict
 
