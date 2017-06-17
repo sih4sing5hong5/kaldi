@@ -26,10 +26,18 @@ cat data/local/free-syllable/uniform.fst | \
   fstarcsort --sort_type=ilabel > $lang/G.fst
 
 for x in exp/tri4 ; do
-    graph_dir=$x/graph_free
-    $train_cmd $graph_dir/mkgraph.log \
-      utils/mkgraph.sh $lang $x $graph_dir
-    steps/decode_fmllr.sh --nj $nj --cmd "$decode_cmd" \
-      --config conf/decode.config \
-      $graph_dir data/train_dev $x/decode_free_syllable
- done;
+	graph_dir=$x/graph_free
+
+	$train_cmd $graph_dir/mkgraph.log \
+	  utils/mkgraph.sh $lang $x $graph_dir
+
+	steps/decode_fmllr.sh --nj $nj --cmd "$decode_cmd" \
+	  --config conf/decode.config \
+	  $graph_dir data/train_dev $x/decode_free_syllable
+
+	steps/nnet2/decode.sh --cmd "$decode_cmd" --nj $nj \
+	  --config conf/decode.config \
+	  --transform-dir $x/decode_free_syllable \
+	  $graph_dir data/train_dev \
+	  exp/nnet2_5/decode_free_syllable
+done;
