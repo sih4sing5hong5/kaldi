@@ -11,6 +11,7 @@ set -e # exit on error
 data='data'
 lang=${data}/lang_free
 lang_log=${lang}_log
+nj=1
 
 mkdir -p ${data}/local/free-syllable/dict
 cp ${data}/local/dict/[^l]* ${data}/local/free-syllable/dict
@@ -21,9 +22,9 @@ utils/prepare_lang.sh ${data}/local/free-syllable/dict "" $lang_log $lang
 
 cat data/local/free-syllable/uniform.fst | \
   fstcompile --isymbols=$lang/words.txt --osymbols=$lang/words.txt --keep_isymbols=false --keep_osymbols=false | \
-  fstarcsort --sort_type=ilabel > G.fst
+  fstarcsort --sort_type=ilabel > $lang/G.fst
 
-for x in exp/{tri4,nnet2_5} ; do
+for x in exp/tri4 ; do
     graph_dir=$x/graph_free
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh $lang $x $graph_dir
