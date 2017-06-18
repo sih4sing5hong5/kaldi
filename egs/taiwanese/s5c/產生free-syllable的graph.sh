@@ -25,6 +25,11 @@ cat data/local/free-syllable/uniform.fst | \
   fstcompile --isymbols=$lang/words.txt --osymbols=$lang/words.txt --keep_isymbols=false --keep_osymbols=false | \
   fstarcsort --sort_type=ilabel > $lang/G.fst
 
+data_free=data/train_dev_free
+cp data/train_dev/[^st]* $data_free
+cp data/train_dev/spk2utt $data_free
+rm -rf $data_free/split*
+
 for x in exp/tri4 ; do
 	graph_dir=$x/graph_free
 
@@ -33,11 +38,11 @@ for x in exp/tri4 ; do
 
 	steps/decode_fmllr.sh --nj $nj --cmd "$decode_cmd" \
 	  --config conf/decode.config \
-	  $graph_dir data/train_dev $x/decode_free_syllable
+	  $graph_dir $data_free $x/decode_free_syllable
 
 	steps/nnet2/decode.sh --cmd "$decode_cmd" --nj $nj \
 	  --config conf/decode.config \
 	  --transform-dir $x/decode_free_syllable \
-	  $graph_dir data/train_dev \
+	  $graph_dir $data_free \
 	  exp/nnet2_5/decode_free_syllable
 done;
