@@ -9,9 +9,9 @@ set -e # exit on error
 
 
 data='data'
-data_origin=$data/$1
-data_free=$data/$2
-decode_dir=decode_free_syllable_$2
+data_free=$1
+data_name=`basename $1`
+decode_dir=decode_free_syllable_${data_name}
 lang=${data}/lang_free
 lang_log=${lang}_log
 nj=1
