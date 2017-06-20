@@ -52,8 +52,9 @@ if [ $STAGE -le 4 ]; then
   # the 1st 10k sentences as dev set, so the 1st 4k won't have been used in the
   # LM training data.   However, they will be in the lexicon, plus speakers
   # may overlap, so it's still not quite equivalent to a test set.
-  rm -rf data/train_dev data/train_nodev
-  #utils/subset_data_dir.sh --first data/train 4000 data/train_dev # 5hr 6min
+  rm -rf data/train_dev data/train_dev_split data/train_nodev
+  utils/subset_data_dir.sh --first data/train 4000 data/train_dev_split
+  # ln -s ../data/train_dev_split data/train_dev
   ln -s ../tshi3/train data/train_dev
   n=$[`cat data/train/segments | wc -l` - 4000]
   utils/subset_data_dir.sh --last data/train $n data/train_nodev
@@ -80,7 +81,7 @@ fi
 if [ $STAGE -le 6 ]; then
   # mfccdir should be some place with a largish disk where you
   # want to store MFCC features.
-  for i in train_dev train_nodev; do
+  for i in train_dev_split train_dev train_nodev; do
     data_dir=data/$i
     make_mfcc_log=exp/make_mfcc/$i
     mfccdir=mfcc/$i
