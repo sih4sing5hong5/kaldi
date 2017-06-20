@@ -28,8 +28,6 @@ cat data/local/free-syllable/uniform.fst | \
   fstcompile --isymbols=$lang/words.txt --osymbols=$lang/words.txt --keep_isymbols=false --keep_osymbols=false | \
   fstarcsort --sort_type=ilabel > $lang/G.fst
 
-cp $data_origin/[^st]* $data_free
-cp $data_origin/spk2utt $data_free
 rm -rf $data_free/split*
 
 for x in exp/tri4 ; do
