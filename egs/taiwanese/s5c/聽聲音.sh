@@ -17,7 +17,7 @@ lai5thiann1=`cat $1 | \
   awk '{print $1}' | \
   grep -vwF -f 有問題的音檔.表 | \
   grep -vwF -f 無問題的音檔.表 | \
-  gshuf -n 50 |\
+  shuf -n 50 |\
   sort | \
   cat`
 

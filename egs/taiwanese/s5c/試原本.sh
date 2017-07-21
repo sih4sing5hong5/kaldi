@@ -23,13 +23,7 @@ tshi3='tshi3/train'
 )
 graph_dir=exp/tri4/graph_sp
 (
-  steps/decode_fmllr.sh --nj 1 --cmd "$decode_cmd" \
+  steps/decode_fmllr.sh --nj 2 --cmd "$decode_cmd" \
     --config conf/decode.config \
     $graph_dir $tshi3 exp/tri4/decode_tshi3_data_lang
-)
-(
-  steps/decode.sh --nj 1 --cmd "$decode_cmd" \
-    --config conf/decode.config \
-    --iter 4 \
-    $graph_dir $tshi3 exp/tri4_mpe/decode_tshi3_data_lang
 )

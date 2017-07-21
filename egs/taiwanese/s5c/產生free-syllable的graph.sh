@@ -30,6 +30,19 @@ cat data/local/free-syllable/uniform.fst | \
 
 rm -rf $data_free/split*
 
+if [ ! -f $data_free/spk2utt ]; then
+  utils/utt2spk_to_spk2utt.pl $data_free/utt2spk > $data_free/spk2utt
+
+  utils/fix_data_dir.sh  $data_free
+
+  mfccdir=$data_free/mfcc
+  make_mfcc_dir=$data_free/make_mfcc/
+
+  steps/make_mfcc.sh --nj $nj --cmd "$train_cmd" \
+   $data_free $make_mfcc_dir $mfccdir
+  steps/compute_cmvn_stats.sh $data_free $make_mfcc_dir $mfccdir
+fi
+
 for x in exp/tri4 ; do
 	graph_dir=$x/graph_free
 
