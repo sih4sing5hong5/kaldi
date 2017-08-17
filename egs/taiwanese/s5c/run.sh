@@ -72,6 +72,7 @@ if [ $STAGE -le 5 ]; then
 		#  mv $x.bo5 $x.bo
 		#done
       cat $x | grep -vwF -f  $x.bo > $x.tmp
+      mv $x $x.guan5
       mv $x.tmp $x
     done
   fi
