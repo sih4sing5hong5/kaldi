@@ -44,16 +44,16 @@ mkdir -p $decode_dir/scoring/
   # cat $decode_dir/a.log | grep ^0 > $decode_dir/scoring/7.0.0.txt
 )
 
-(
-  steps/nnet3/decode.sh --nj 1 --cmd "$decode_cmd" \
-    --acwt 1.0 \
-    --post_decode_acwt 10.0 \
-    --skip_diagnostics true \
-    --stage 3 \
-    --scoring_opts '--min_lmwt 6 --max_lmwt 20' \
-    --config conf/decode.config \
-    $graph_dir $tshi3 $decode_dir
-)
+# (
+#   steps/nnet3/decode.sh --nj 1 --cmd "$decode_cmd" \
+#     --acwt 1.0 \
+#     --post_decode_acwt 10.0 \
+#     --skip_diagnostics true \
+#     --stage 3 \
+#     --scoring_opts '--min_lmwt 6 --max_lmwt 20' \
+#     --config conf/decode.config \
+#     $graph_dir $tshi3 $decode_dir
+# )
 
 lattice-best-path --word-symbol-table=$graph_dir/words.txt \
   "ark:gunzip -c exp/nnet3_chain/lat.1.gz|" ark,t:- \
