@@ -40,7 +40,7 @@ mkdir -p $decode_dir/scoring/
   exp/nnet3_chain/final.mdl \
   exp/nnet3_chain/HCLG.fst \
   "ark,s,cs:apply-cmvn --norm-means=false --norm-vars=false --utt2spk=ark:$tshi3/utt2spk scp:$tshi3/cmvn.scp scp:$tshi3/feats.scp ark:- |" \
-  "ark:|lattice-scale --acoustic-scale=10.0 ark:- ark:- | gzip -c >exp/nnet3_chain/lat.1.gz" 2>&1 | tee $decode_dir/a.log
+  "ark:|lattice-scale --acoustic-scale=10.0 ark:- ark:- | gzip -c > $decode_dir/lat1.1.gz" 2>&1 | tee $decode_dir/a.log
   # cat $decode_dir/a.log | grep ^0 > $decode_dir/scoring/7.0.0.txt
 )
 
@@ -54,8 +54,16 @@ mkdir -p $decode_dir/scoring/
 #     --config conf/decode.config \
 #     $graph_dir $tshi3 $decode_dir
 # )
+lattice-lmrescore --lm-scale=-1.0 \
+  "ark:gunzip -c $decode_dir/lat1.1.gz|" \
+  "fstproject --project_output=true $graph_dir/2nd/G.fst |" \
+  ark:- | \
+  lattice-lmrescore-const-arpa --lm-scale=1.0 \
+     ark:- \
+     $graph_dir/2nd/G.carpa \
+     "ark,t:|gzip -c> $decode_dir/lat3.1.gz"
 
 lattice-best-path --word-symbol-table=$graph_dir/words.txt \
-  "ark:gunzip -c exp/nnet3_chain/lat.1.gz|" ark,t:- \
+  "ark:gunzip -c $decode_dir/lat3.1.gz|" ark,t:- \
   | utils/int2sym.pl -f 2- $graph_dir/words.txt \
   | tee $decode_dir/scoring/7.0.0.txt
