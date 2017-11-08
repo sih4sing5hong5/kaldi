@@ -6,23 +6,29 @@
 # 服務來試.sh exp/model/graph_sp data/train exp/model/decode_hok8bu7_1
 
 set -e # exit on error
-
-tshi3=$2
+data=ver5.4
 (
-  utils/utt2spk_to_spk2utt.pl $tshi3/utt2spk > $tshi3/spk2utt
+  rm -f $data/dict.ver5.4/lexiconp.txt
+  utils/prepare_lang.sh $data/dict.ver5.4 "<unk>"  $data/local/lang ver5.4/lang_dict
+  
+  LM_GZ=ver5.4/cc_10k.1gpr.arpa.gz
+  # cat ver5.4/cc_10k.1gpr.arpa | gzip > $LM_GZ
+  utils/format_lm.sh $data/lang_dict $LM_GZ $data/dict.ver5.4/lexicon.txt $data/lang
 
-  utils/fix_data_dir.sh  $tshi3
-
-  mfccdir=$tshi3/mfcc
-  make_mfcc_dir=$tshi3/make_mfcc/
-
-  steps/make_mfcc.sh --nj 1 --cmd "$train_cmd" \
-   $tshi3 $make_mfcc_dir $mfccdir
-  steps/compute_cmvn_stats.sh $tshi3 $make_mfcc_dir $mfccdir
+  
+  LM3_GZ=ver5.4/cc_10k.3gpr.arpa.gz
+  # cat ver5.4/cc_10k.1gpr.arpa | gzip > $LM3_GZ
+  utils/build_const_arpa_lm.sh $LM3_GZ $data/lang $data/lang-3grams
+  
+  graph_dir=exp/nnet3_chain/graph
+  $train_cmd $graph_dir/mkgraph.log \
+      utils/mkgraph.sh $data/lang exp/nnet3_chain $graph_dir
+  
 )
+exit 0
+tshi3=$2
+
 graph_dir=$1
-# lang_dir=$2
-lang_dir=ver5.4/lang-3grams
 decode_dir=$3
 # mkdir -p $3
 mkdir -p $decode_dir/scoring/
@@ -38,11 +44,11 @@ mkdir -p $decode_dir/scoring/
   --min-active=200 \
   --beam=15.0 --lattice-beam=8.0 --acoustic-scale=1.0 \
   --allow-partial=true \
-  --word-symbol-table=$graph_dir/words.txt \
+  --word-symbol-table=exp/nnet3_chain/words.txt \
   exp/nnet3_chain/final.mdl \
-  $graph_dir/HCLG.fst \
+  exp/nnet3_chain/HCLG.fst \
   "ark,s,cs:apply-cmvn --norm-means=false --norm-vars=false --utt2spk=ark:$tshi3/utt2spk scp:$tshi3/cmvn.scp scp:$tshi3/feats.scp ark:- |" \
-  "ark:|lattice-scale --acoustic-scale=10.0 ark:- ark:- | gzip -c > $decode_dir/lat1.1.gz" 2>&1 | tee $decode_dir/a.log
+  "ark:|lattice-scale --acoustic-scale=10.0 ark:- ark:- | gzip -c >exp/nnet3_chain/lat.1.gz" 2>&1 | tee $decode_dir/a.log
   # cat $decode_dir/a.log | grep ^0 > $decode_dir/scoring/7.0.0.txt
 )
 
@@ -56,16 +62,8 @@ mkdir -p $decode_dir/scoring/
 #     --config conf/decode.config \
 #     $graph_dir $tshi3 $decode_dir
 # )
-lattice-lmrescore --lm-scale=-1.0 \
-  "ark:gunzip -c $decode_dir/lat1.1.gz|" \
-  "fstproject --project_output=true $lang_dir/G.fst |" \
-  ark:- | \
-  lattice-lmrescore-const-arpa --lm-scale=1.0 \
-     ark:- \
-     $lang_dir/G.carpa \
-     "ark,t:|gzip -c> $decode_dir/lat3.1.gz"
 
 lattice-best-path --word-symbol-table=$graph_dir/words.txt \
-  "ark:gunzip -c $decode_dir/lat3.1.gz|" ark,t:- \
+  "ark:gunzip -c exp/nnet3_chain/lat.1.gz|" ark,t:- \
   | utils/int2sym.pl -f 2- $graph_dir/words.txt \
   | tee $decode_dir/scoring/7.0.0.txt
