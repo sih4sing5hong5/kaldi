@@ -7,7 +7,7 @@
 
 set -e # exit on error
 
-tshi3=$2
+tshi3=$3
 (
   utils/utt2spk_to_spk2utt.pl $tshi3/utt2spk > $tshi3/spk2utt
 
@@ -21,9 +21,9 @@ tshi3=$2
   steps/compute_cmvn_stats.sh $tshi3 $make_mfcc_dir $mfccdir
 )
 graph_dir=$1
-# lang_dir=$2
-lang_dir=ver5.4/lang-3grams
-decode_dir=$3
+lang_dir=$2
+# lang_dir=ver5.4/lang-3grams
+decode_dir=$4
 # mkdir -p $3
 mkdir -p $decode_dir/scoring/
 (
