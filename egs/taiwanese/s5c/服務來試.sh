@@ -7,7 +7,7 @@
 
 set -e # exit on error
 
-tshi3=$2
+tshi3=$3
 (
   utils/utt2spk_to_spk2utt.pl $tshi3/utt2spk > $tshi3/spk2utt
 
@@ -21,7 +21,7 @@ tshi3=$2
   steps/compute_cmvn_stats.sh $tshi3 $make_mfcc_dir $mfccdir
 )
 graph_dir=$1
-decode_dir=$3
+decode_dir=$4
 (
   steps/decode_fmllr.sh --nj 1 --cmd "$decode_cmd" \
     --config conf/decode.config \
