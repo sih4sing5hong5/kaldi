@@ -8,13 +8,13 @@
 set -e # exit on error
 data=ver5-lam7
 tai5_data=ver5-tai5
-hua5_data=ver5.4
+hua5_data=ver5-hua5
 tmp_dir=$data/txt
 (
   mkdir -p $tmp_dir $data/dict
 
-  cp $tai5_data/dict.ver5.4/* $data/dict/
-  cat $tai5_data/dict.ver5.4/lexicon.txt $hua5_data/dict.ver5.4/lexicon.txt | \
+  cp $tai5_data/dict/* $data/dict/
+  cat $tai5_data/dict/lexicon.txt $hua5_data/dict/lexicon.txt | \
     sort -u | \
     cat > $data/dict/lexicon.txt
   rm -f $data/dict/lexiconp.txt
