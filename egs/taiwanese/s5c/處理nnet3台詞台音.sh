@@ -11,9 +11,8 @@ tmp_dir=$data/tai5
 (
   mkdir -p $tmp_dir
   
-  rm -f $data/dict/lexicon.txt $data/dict/lexiconp.txt
-  cat $data/dict/lexicon*.txt | sort -u > $data/dict/lexicon.txt.tiau3
-  bash $data/dict/處理lexicon.sh $data/dict/lexicon.txt.tiau3 $data/dict/lexicon.txt 
+  rm -f $data/dict/lexiconp.txt
+  bash $data/dict/處理lexicon.sh $data/dict/lexicon.txt.tiau3 $data/dict/lexicon.txt
   utils/prepare_lang.sh $data/dict "<unk>"  $data/local/lang $data/lang_dict
  
   ngram-count -text $data/語言模型.txt -order 1 \
@@ -29,25 +28,25 @@ tmp_dir=$data/tai5
   LM3_tai5=$data/sui3.tai5.lm
   LM_ib=$data/in1bun5.lm
   LM_hun1su5=$data/正規化分詞.lm
-  LM_kam2tshat4=$data/監察用.lm
+  LM_kam2tshat4=$data/口語.lm
   LM=$data/sui1.lm
   LM3=$data/sui3.lm
 
   ngram-count -text $data/語言模型.txt -order 3 \
     -vocab $tmp_dir/頭前5000詞.vocab \
     -prune 1e-4 -lm $LM_tai5
-  ngram -lm $LM_tai5 -mix-lm $LM_ib -lambda 0.05 \
+  ngram -lm $LM_tai5 -mix-lm $LM_ib -lambda 0.04 \
     -mix-lm2 $LM_hun1su5 -mix-lambda2 0.4 \
-    -mix-lm3 $LM_kam2tshat4 -mix-lambda3 0.5 \
+    -mix-lm3 $LM_kam2tshat4 -mix-lambda3 0.4 \
     -write-lm $LM
 
   ngram-count -text $data/語言模型.txt -order 3 \
     -vocab $tmp_dir/頭前5000詞.vocab \
     -prune 1e-7 -lm $LM3_tai5
 
-  ngram -lm $LM3_tai5 -mix-lm $LM_ib -lambda 0.05 \
+  ngram -lm $LM3_tai5 -mix-lm $LM_ib -lambda 0.04 \
     -mix-lm2 $LM_hun1su5 -mix-lambda2 0.4 \
-    -mix-lm3 $LM_kam2tshat4 -mix-lambda3 0.5 \
+    -mix-lm3 $LM_kam2tshat4 -mix-lambda3 0.4 \
     -write-lm $LM3
     
   LM_GZ=$LM.gz

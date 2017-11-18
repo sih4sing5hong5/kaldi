@@ -22,9 +22,9 @@ tmp_dir=$data/txt
  
   LM=$data/sui1.lm
   LM3=$data/sui3.lm
-  ngram -lm $tai5_data/sui1.lm -mix-lm ${hua5_data}/cc_10k.1gpr.arpa.gz -lambda 0.5 \
+  ngram -lm $tai5_data/sui1.lm -mix-lm ${hua5_data}/in1bun5.1gpr.arpa.gz -lambda 0.5 \
     -write-lm $LM
-  ngram -lm $tai5_data/sui3.lm -mix-lm ${hua5_data}/cc_10k.3gpr.arpa.gz -lambda 0.5 \
+  ngram -lm $tai5_data/sui3.lm -mix-lm ${hua5_data}/in1bun5.3gpr.arpa.gz -lambda 0.5 \
     -write-lm $LM3
   
   LM_GZ=$LM.gz

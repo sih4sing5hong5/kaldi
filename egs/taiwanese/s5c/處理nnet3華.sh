@@ -15,19 +15,19 @@ data_tai5=ver5-tai5
   
   LM_ib=$data_tai5/in1bun5.lm
 
-  LM_KU=ver5.4/cc_10k.1gpr.arpa
-  LM=ver5.4/in1bun5.1gpr.arpa
-  LM_GZ=ver5.4/in1bun5.1gpr.arpa.gz
-  ngram -lm $LM_KU -mix-lm $LM_ib -lambda 0.05 \
+  LM_KU=$data/cc_10k.1gpr.arpa
+  LM=$data/in1bun5.1gpr.arpa
+  LM_GZ=$data/in1bun5.1gpr.arpa.gz
+  ngram -lm $LM_KU -mix-lm $LM_ib -lambda 0.99 \
     -write-lm $LM
   cat $LM | gzip > $LM_GZ
   utils/format_lm.sh $data/lang_dict $LM_GZ $data/dict/lexicon.txt $data/lang
 
   
-  LM3_KU=ver5.4/cc_10k.3gpr.arpa
-  LM3=ver5.4/in1bun5.3gpr.arpa
-  LM3_GZ=ver5.4/in1bun5.3gpr.arpa.gz
-  ngram -lm $LM3_KU -mix-lm $LM_ib -lambda 0.05 \
+  LM3_KU=$data/cc_10k.3gpr.arpa
+  LM3=$data/in1bun5.3gpr.arpa
+  LM3_GZ=$data/in1bun5.3gpr.arpa.gz
+  ngram -lm $LM3_KU -mix-lm $LM_ib -lambda 0.99 \
     -write-lm $LM3
   cat $LM3 | gzip > $LM3_GZ
   utils/build_const_arpa_lm.sh $LM3_GZ $data/lang $data/lang-3grams
