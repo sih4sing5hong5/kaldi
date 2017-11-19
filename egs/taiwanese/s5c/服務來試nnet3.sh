@@ -65,7 +65,15 @@ lattice-lmrescore --lm-scale=-1.0 \
      $lang_dir/G.carpa \
      "ark,t:|gzip -c> $decode_dir/lat3.1.gz"
 
-lattice-best-path --word-symbol-table=$graph_dir/words.txt \
-  "ark:gunzip -c $decode_dir/lat3.1.gz|" ark,t:- \
-  | utils/int2sym.pl -f 2- $graph_dir/words.txt \
-  | tee $decode_dir/scoring/7.0.0.txt
+lattice-scale --inv-acoustic-scale=13 "ark:gunzip -c $decode_dir/lat3.1.gz|" ark:- | \
+        lattice-add-penalty --word-ins-penalty=0.0 ark:- ark:- | \
+        lattice-best-path --word-symbol-table=$graph_dir/words.txt ark:- ark,t:- | \
+        utils/int2sym.pl -f 2- $graph_dir/words.txt | \
+        tee $decode_dir/scoring/7.0.0.txt
+# lattice-best-path --word-symbol-table=$graph_dir/words.txt \
+#   "ark:gunzip -c $decode_dir/lat3.1.gz|" ark,t:- \
+#   | utils/int2sym.pl -f 2- $graph_dir/words.txt \
+#   | tee $decode_dir/scoring/7.0.0.txt
+
+# cp $decode_dir/lat3.1.gz $decode_dir/lat.1.gz
+# steps/score_kaldi.sh $tshi3 $graph_dir $decode_dir
