@@ -3,16 +3,16 @@
 . path.sh
 
 # Global options,
-graph=exp/tri4/graph_sw1_tg
-arpa_gz=data/local/lm/sw1_fsh.o3g.kn.gz
+graph=exp/tri4/graph
+arpa_gz=data/local/lm/語言模型.lm.gz
 lmwt=14
 
 # Dev-set options,
-dev_data=data/train_dev
+dev_data=data/train_nodev
 dev_latdir=exp/tri4/decode_dev_sw1_tg
 
 # Eval-set options,
-eval_data=data/eval2000
+eval_data=data/train_dev
 eval_latdir=exp/tri4/decode_eval2000_sw1_tg
 
 . utils/parse_options.sh
@@ -37,16 +37,17 @@ awk '{if(r==0) { len_hash[$1] = NF-2; }
       print $0, len; }}' \
   r=0 $graph/phones/align_lexicon.txt \
   r=1 $graph/words.txt \
-  >$word_length
+  | tee $word_length > calibration_word_length.txt
 
 # Extract unigrams,
 unigrams=$(mktemp); steps/conf/parse_arpa_unigrams.py $graph/words.txt $arpa_gz $unigrams
+cat $unigrams > calibration_unigrams
 
 ###### Paste the 'word-specific' features (first 4 columns have fixed position, more feature-columns can be added),
 # Format: "word word_id filter length other_features"
 word_feats=$(mktemp)
-paste $word_filter <(awk '{ print $3 }' $word_length) <(awk '{ print $3 }' $unigrams) > $word_feats
-
+paste $word_filter <(awk '{ print $3 }' $word_length) <(awk '{ print $3 }' $unigrams) | tee $word_feats > calibration_feats
+exit 0
 
 ###### Train the calibration,
 steps/conf/train_calibration.sh --cmd "$decode_cmd" --lmwt $lmwt \
