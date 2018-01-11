@@ -28,7 +28,8 @@ fi
 
 if [ $STAGE -le 2 ]; then
   rm -rf data/lang_train
-  utils/prepare_lang.sh data/local/dict "<UNK>"  data/local/lang data/lang_train
+  mkdir -p data/tmp
+  utils/prepare_lang.sh data/local/dict "<UNK>"  data/tmp/lang_train data/lang_train
 fi
 
 # Now make MFCC features.
@@ -37,9 +38,10 @@ if [ $STAGE -le 6 ]; then
   # want to store MFCC features.
   for i in train; do
     data_dir=data/$i
-    make_mfcc_log=exp/make_mfcc/$i
-    mfccdir=mfcc/$i
+    make_mfcc_log=data/mfcc_log/$i
+    mfccdir=data/mfcc/$i
     rm -rf $make_mfcc_log $mfccdir
+    mkdir -p $make_mfcc_log $mfccdir
     utils/fix_data_dir.sh $data_dir
     steps/make_mfcc.sh --nj $nj --cmd "$train_cmd" \
      $data_dir $make_mfcc_log $mfccdir
