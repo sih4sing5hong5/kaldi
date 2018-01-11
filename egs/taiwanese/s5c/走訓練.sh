@@ -95,6 +95,10 @@ if [ $STAGE -le 15 ]; then
 
 fi
 
+
+exit 0
+
+
 if [ $STAGE -le 16 ]; then
   steps/cleanup/clean_and_segment_data.sh \
     --nj $nj \

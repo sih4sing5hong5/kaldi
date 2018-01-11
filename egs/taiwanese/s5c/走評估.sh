@@ -35,21 +35,21 @@ if [ $STAGE -le 10 ]; then
       utils/mkgraph.sh $lang exp/tri1 $graph_dir
     steps/decode_si.sh --nj $nj --cmd "$decode_cmd" --config conf/decode.config \
       $graph_dir data/dev exp/tri1/decode_train_dev
-  ) &
+  )
   (
     graph_dir=exp/tri2/graph
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh $lang exp/tri2 $graph_dir
     steps/decode.sh --nj $nj --cmd "$decode_cmd" --config conf/decode.config \
       $graph_dir data/dev exp/tri2/decode_train_dev
-  ) &
+  )
   (
     graph_dir=exp/tri3/graph
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh $lang exp/tri3 $graph_dir
     steps/decode.sh --nj $nj --cmd "$decode_cmd" --config conf/decode.config \
       $graph_dir data/dev exp/tri3/decode_train_dev
-  ) &
+  )
   (
     graph_dir=exp/tri4/graph
     $train_cmd $graph_dir/mkgraph.log \
@@ -57,7 +57,7 @@ if [ $STAGE -le 10 ]; then
     steps/decode_fmllr.sh --nj $nj --cmd "$decode_cmd" \
       --config conf/decode.config \
       $graph_dir data/dev exp/tri4/decode_train_dev
-  ) &
+  )
 fi
 
 wait
