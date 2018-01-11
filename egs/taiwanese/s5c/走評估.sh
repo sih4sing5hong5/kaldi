@@ -60,6 +60,8 @@ if [ $STAGE -le 10 ]; then
   ) &
 fi
 
+wait
+
 exit 0
 
 if [ $STAGE -le 11 ]; then

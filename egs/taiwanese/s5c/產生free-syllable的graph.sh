@@ -9,7 +9,6 @@ set -e # exit on error
 
 
 data='data'
-data_free=$1
 data_name=`basename $1`
 decode_dir=decode_free_syllable_${data_name}
 lang=${data}/lang_free
