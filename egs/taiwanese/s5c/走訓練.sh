@@ -95,8 +95,6 @@ if [ $STAGE -le 15 ]; then
 
 fi
 
-bash 看結果.sh | tee kiat4-ko2
-
 exit 0
 
 
