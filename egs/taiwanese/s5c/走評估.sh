@@ -21,17 +21,14 @@ fi
 # Now make MFCC features.
 if [ $STAGE -le 6 ]; then
   utils/utt2spk_to_spk2utt.pl $test_data/utt2spk > $test_data/spk2utt
-  for i in dev; do
-    data_dir=data/$i
-    make_mfcc_log=data/mfcc_log/$i
-    mfccdir=data/mfcc/$i
+    make_mfcc_log=mfcc/log/$test_data
+    mfccdir=mfcc/$test_data
     rm -rf $make_mfcc_log $mfccdir
     mkdir -p $make_mfcc_log $mfccdir
     utils/fix_data_dir.sh $data_dir
     steps/make_mfcc.sh --nj $nj --cmd "$train_cmd" \
      $data_dir $make_mfcc_log $mfccdir
     steps/compute_cmvn_stats.sh $data_dir $make_mfcc_log $mfccdir
-  done
 fi
 
 if [ $STAGE -le 10 ]; then
