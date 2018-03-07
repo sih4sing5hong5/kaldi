@@ -25,26 +25,7 @@ if [ $STAGE -le 6 ]; then
     mfccdir=mfcc/$test_data
     rm -rf $make_mfcc_log $mfccdir
     mkdir -p $make_mfcc_log $mfccdir
-    utils/fix_data_dir.sh $data_dir
-    steps/make_mfcc.sh --nj $nj --cmd "$train_cmd" \
-     $data_dir $make_mfcc_log $mfccdir
-    steps/compute_cmvn_stats.sh $data_dir $make_mfcc_log $mfccdir
-fi
-
-if [ $STAGE -le 10 ]; then
-  (
-    graph_dir=exp/tri1/graph
-    $train_cmd $graph_dir/mkgraph.log \
-      utils/mkgraph.sh $lang exp/tri1 $graph_dir
-    steps/decode_si.sh --nj $nj --cmd "$decode_cmd" --config conf/decode.config \
-      $graph_dir $test_data exp/tri1/decode_train_dev
-  )
-  (
-    graph_dir=exp/tri2/graph
-    $train_cmd $graph_dir/mkgraph.log \
-      utils/mkgraph.sh $lang exp/tri2 $graph_dir
-    steps/decode.sh --nj $nj --cmd "$decode_cmd" --config conf/decode.config \
-      $graph_dir $test_data exp/tri2/decode_train_dev
+    utils/fix_data exp/tri2/decode_train_dev
   )
   (
     graph_dir=exp/tri3/graph
