@@ -25,7 +25,7 @@ if [ $STAGE -le 6 ]; then
   mfccdir=mfcc/$test_dir
   rm -rf $make_mfcc_log $mfccdir
   mkdir -p $make_mfcc_log $mfccdir
-  utils/fix_test_dir.sh $test_dir
+  utils/fix_data_dir.sh $test_dir
   steps/make_mfcc.sh --nj $nj --cmd "$train_cmd" \
    $test_dir $make_mfcc_log $mfccdir
   steps/compute_cmvn_stats.sh $test_dir $make_mfcc_log $mfccdir
