@@ -11,10 +11,16 @@ STAGE=0
 nj=4
 
 lang=$1 # data/lang_free
+if [ $# != 2 ]; then
+  test_data=data/dev
+else
+  test_data=$2
+fi
+
 
 # Now make MFCC features.
 if [ $STAGE -le 6 ]; then
-  utils/utt2spk_to_spk2utt.pl data/dev/utt2spk > data/dev/spk2utt
+  utils/utt2spk_to_spk2utt.pl $test_data/utt2spk > $test_data/spk2utt
   for i in dev; do
     data_dir=data/$i
     make_mfcc_log=data/mfcc_log/$i
@@ -34,21 +40,21 @@ if [ $STAGE -le 10 ]; then
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh $lang exp/tri1 $graph_dir
     steps/decode_si.sh --nj $nj --cmd "$decode_cmd" --config conf/decode.config \
-      $graph_dir data/dev exp/tri1/decode_train_dev
+      $graph_dir $test_data exp/tri1/decode_train_dev
   )
   (
     graph_dir=exp/tri2/graph
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh $lang exp/tri2 $graph_dir
     steps/decode.sh --nj $nj --cmd "$decode_cmd" --config conf/decode.config \
-      $graph_dir data/dev exp/tri2/decode_train_dev
+      $graph_dir $test_data exp/tri2/decode_train_dev
   )
   (
     graph_dir=exp/tri3/graph
     $train_cmd $graph_dir/mkgraph.log \
       utils/mkgraph.sh $lang exp/tri3 $graph_dir
     steps/decode.sh --nj $nj --cmd "$decode_cmd" --config conf/decode.config \
-      $graph_dir data/dev exp/tri3/decode_train_dev
+      $graph_dir $test_data exp/tri3/decode_train_dev
   )
   (
     graph_dir=exp/tri4/graph
@@ -56,7 +62,7 @@ if [ $STAGE -le 10 ]; then
       utils/mkgraph.sh $lang exp/tri4 $graph_dir
     steps/decode_fmllr.sh --nj $nj --cmd "$decode_cmd" \
       --config conf/decode.config \
-      $graph_dir data/dev exp/tri4/decode_train_dev
+      $graph_dir $test_data exp/tri4/decode_train_dev
   )
 fi
 
@@ -71,6 +77,6 @@ if [ $STAGE -le 11 ]; then
       utils/mkgraph.sh $lang exp/tri5 $graph_dir
     steps/decode_fmllr.sh --nj $nj --cmd "$decode_cmd" \
       --config conf/decode.config \
-      $graph_dir data/dev exp/tri5/decode_train_dev
+      $graph_dir $test_data exp/tri5/decode_train_dev
   )
 fi
