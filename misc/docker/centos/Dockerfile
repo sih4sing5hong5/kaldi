@@ -19,7 +19,7 @@ RUN ln -s /usr/bin/python3.6 /usr/bin/python3
 
 WORKDIR /usr/local/
 # Use the newest kaldi version
-RUN git clone https://github.com/kaldi-asr/kaldi.git
+RUN git clone https://github.com/sih4sing5hong5/kaldi.git
 
 
 WORKDIR /usr/local/kaldi/tools
