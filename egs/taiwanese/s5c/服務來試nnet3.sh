@@ -29,7 +29,7 @@ mkdir -p $decode_dir/scoring/
 (
   nnet3-latgen-faster \
   --frame-subsampling-factor=3 \
-  --frames-per-chunk=50 \
+  --frames-per-chunk=51 \
   --extra-left-context=0 \
   --extra-right-context=0 \
   --extra-left-context-initial=-1 \
