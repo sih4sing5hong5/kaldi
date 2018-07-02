@@ -21,7 +21,7 @@ set -e # exit on error
 #giap8=$3
 
 tshi3="$1"
-nj=4
+nj=1
 
 mfccdir=`pwd`/mfcc
 vaddir=`pwd`/mfcc
@@ -36,6 +36,10 @@ if [ $stage -le 1 ]; then
   # callhome1 and callhome2.  Each partition is treated like a held-out
   # dataset, and used to estimate various quantities needed to perform
   # diarization on the other part (and vice versa).
+  utils/fix_data_dir.sh $tshi3
+  cp ../../callhome_diarization/v1/conf/vad.conf conf/
+
+  
   steps/make_mfcc.sh --mfcc-config conf/mfcc.conf --nj $nj \
     --cmd "$train_cmd" --write-utt2num-frames true \
     $tshi3 exp/make_mfcc $mfccdir
@@ -43,14 +47,18 @@ if [ $stage -le 1 ]; then
 
   compute_vad_decision.sh --nj $nj --cmd "$train_cmd" \
     $tshi3 exp/make_vad $vaddir
-  utils/fix_data_dir.sh data/$name
+  utils/fix_data_dir.sh $tshi3
 
+  echo "0.01" > $tshi3/frame_shift
+  vad_to_segments.sh --nj $nj --cmd "$train_cmd" \
+    $tshi3 ${tshi3}_segmented
   # The sre dataset is a subset of train
-  cp data/train/{feats,vad}.scp data/sre/
-  utils/fix_data_dir.sh data/sre
+#  mkdir data/sre -p
+#  cp $tshi3/{feats,vad}.scp data/sre/
+#  utils/fix_data_dir.sh data/sre
 
   # Create segments for ivector extraction for PLDA training data.
-  echo "0.01" > data/sre/frame_shift
-  vad_to_segments.sh --nj $nj --cmd "$train_cmd" \
-    data/sre data/sre_segmented
+#  echo "0.01" > data/sre/frame_shift
+#  vad_to_segments.sh --nj $nj --cmd "$train_cmd" \
+#    data/sre data/sre_segmented
 fi
