@@ -16,11 +16,12 @@
 
 set -e # exit on error
 
-data=$1
-model=$2
-giap8=$3
+#data=$1
+#model=$2
+#giap8=$3
 
-tshi3="${giap8}/train"
+tshi3="$1"
+nj=4
 
 mfccdir=`pwd`/mfcc
 vaddir=`pwd`/mfcc
