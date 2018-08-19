@@ -3,7 +3,7 @@
 . cmd.sh
 . path.sh
 
-# 服務來試.sh exp/model/graph_sp data/train exp/model/decode_hok8bu7_1
+# 服務來試.sh exp/model/graph_sp data/lang data/train exp/model/decode_hok8bu7_1
 
 set -e # exit on error
 
