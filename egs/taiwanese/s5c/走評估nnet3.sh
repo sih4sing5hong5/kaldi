@@ -38,7 +38,7 @@ if [ $STAGE -le 6 ]; then
     utils/data/limit_feature_dim.sh 0:39 ${test_dir}_hires ${test_dir}_hires_nopitch 
     steps/compute_cmvn_stats.sh ${test_dir}_hires_nopitch $make_mfcc_log $mfccdir
     steps/online/nnet2/extract_ivectors_online.sh --cmd "$train_cmd" --nj $nj \
-      ${test_data}_hires_nopitch exp/nnet3/extractor \
+      ${test_dir}_hires_nopitch exp/nnet3/extractor \
       exp/nnet3/ivectors_test
 
 fi
