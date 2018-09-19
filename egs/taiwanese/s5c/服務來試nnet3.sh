@@ -16,24 +16,20 @@ tshi3=$3
 
   utils/fix_data_dir.sh ${tshi3}
 
-  mfccdir=${tshi3}_hires/mfcc
-  make_mfcc_log=${tshi3}_hires/make_mfcc/
-
-
-    utils/copy_data_dir.sh $tshi3 ${tshi3}_hires
+  mfccdir=${tshi3}/mfcc
+  make_mfcc_log=${tshi3}/make_mfcc/
   
-  
-    steps/make_mfcc_pitch.sh --nj $nj --mfcc-config conf/mfcc_hires.conf \
-      --cmd "$train_cmd" ${tshi3}_hires $make_mfcc_log $mfccdir
-    steps/compute_cmvn_stats.sh ${tshi3}_hires $make_mfcc_log $mfccdir 
+  steps/make_mfcc_pitch.sh --nj $nj --mfcc-config conf/mfcc_hires.conf \
+    --cmd "$train_cmd" ${tshi3} $make_mfcc_log $mfccdir
+  steps/compute_cmvn_stats.sh ${tshi3} $make_mfcc_log $mfccdir 
 
-    # create MFCC data dir without pitch to extract iVector
-    utils/data/limit_feature_dim.sh 0:39 ${tshi3}_hires ${tshi3}_hires_nopitch 
-    steps/compute_cmvn_stats.sh ${tshi3}_hires_nopitch $make_mfcc_log $mfccdir
+  # create MFCC data dir without pitch to extract iVector
+  utils/data/limit_feature_dim.sh 0:39 ${tshi3} ${tshi3}_nopitch 
+  steps/compute_cmvn_stats.sh ${tshi3}_nopitch $make_mfcc_log $mfccdir
 
-    steps/online/nnet2/extract_ivectors_online.sh --cmd "$train_cmd" --nj $nj \
-      ${tshi3}_hires_nopitch exp/nnet3/extractor \
-      $online_ivector_dir
+  steps/online/nnet2/extract_ivectors_online.sh --cmd "$train_cmd" --nj $nj \
+    ${tshi3}_nopitch exp/nnet3/extractor \
+    $online_ivector_dir
 )
 graph_dir=$1
 lang_dir=$2
@@ -59,7 +55,7 @@ mkdir -p $decode_dir/scoring/
   $ivector_opts \
   $graph_dir/../final.mdl \
   $graph_dir/HCLG.fst \
-  "ark,s,cs:apply-cmvn --norm-means=false --norm-vars=false --utt2spk=ark:${tshi3}_hires/utt2spk scp:${tshi3}_hires/cmvn.scp scp:${tshi3}_hires/feats.scp ark:- |" \
+  "ark,s,cs:apply-cmvn --norm-means=false --norm-vars=false --utt2spk=ark:${tshi3}/utt2spk scp:${tshi3}/cmvn.scp scp:${tshi3}/feats.scp ark:- |" \
   "ark:|lattice-scale --acoustic-scale=10.0 ark:- ark:- | gzip -c > $decode_dir/lat1.1.gz" 2>&1 | tee $decode_dir/a.log
   # cat $decode_dir/a.log | grep ^0 > $decode_dir/scoring/7.0.0.txt
 )
@@ -84,4 +80,4 @@ lattice-scale --inv-acoustic-scale=13 "ark:gunzip -c $decode_dir/lat3.1.gz|" ark
 #   | tee $decode_dir/scoring/7.0.0.txt
 
 # cp $decode_dir/lat3.1.gz $decode_dir/lat.1.gz
-# steps/score_kaldi.sh ${tshi3}_hires $graph_dir $decode_dir
+# steps/score_kaldi.sh ${tshi3} $graph_dir $decode_dir
