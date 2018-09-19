@@ -8,6 +8,7 @@
 set -e # exit on error
 
 nj=1
+online_ivector_dir=exp/nnet3/ivectors_test
 
 tshi3=$3
 (
@@ -29,7 +30,7 @@ tshi3=$3
     # create MFCC data dir without pitch to extract iVector
     utils/data/limit_feature_dim.sh 0:39 ${tshi3}_hires ${tshi3}_hires_nopitch 
     steps/compute_cmvn_stats.sh ${tshi3}_hires_nopitch $make_mfcc_log $mfccdir
-  online_ivector_dir=exp/nnet3/ivectors_test
+
     steps/online/nnet2/extract_ivectors_online.sh --cmd "$train_cmd" --nj $nj \
       ${tshi3}_hires_nopitch exp/nnet3/extractor \
       $online_ivector_dir
