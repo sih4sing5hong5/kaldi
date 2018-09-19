@@ -7,6 +7,8 @@
 
 set -e # exit on error
 
+nj=1
+
 tshi3=$3
 (
   utils/utt2spk_to_spk2utt.pl $tshi3/utt2spk > $tshi3/spk2utt
