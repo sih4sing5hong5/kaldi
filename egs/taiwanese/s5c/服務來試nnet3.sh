@@ -11,14 +11,25 @@ tshi3=$3
 (
   utils/utt2spk_to_spk2utt.pl $tshi3/utt2spk > $tshi3/spk2utt
 
-  utils/fix_data_dir.sh  $tshi3
+  utils/fix_data_dir.sh $tshi3
 
   mfccdir=$tshi3/mfcc
   make_mfcc_dir=$tshi3/make_mfcc/
 
-  steps/make_mfcc.sh --nj 1 --cmd "$train_cmd" \
-   $tshi3 $make_mfcc_dir $mfccdir
-  steps/compute_cmvn_stats.sh $tshi3 $make_mfcc_dir $mfccdir
+
+    utils/copy_data_dir.sh $tshi3 ${tshi3}_hires
+
+    steps/make_mfcc_pitch.sh --nj $nj --mfcc-config conf/mfcc_hires.conf \
+      --cmd "$train_cmd" ${tshi3}_hires $make_mfcc_log $mfccdir
+    steps/compute_cmvn_stats.sh ${tshi3}_hires $make_mfcc_log $mfccdir 
+
+    utils/fix_data_dir.sh ${tshi3}_hires
+    # create MFCC data dir without pitch to extract iVector
+    utils/data/limit_feature_dim.sh 0:39 ${tshi3}_hires ${tshi3}_hires_nopitch 
+    steps/compute_cmvn_stats.sh ${tshi3}_hires_nopitch $make_mfcc_log $mfccdir
+    steps/online/nnet2/extract_ivectors_online.sh --cmd "$train_cmd" --nj $nj \
+      ${tshi3}_hires_nopitch exp/nnet3/extractor \
+      exp/nnet3/ivectors_test
 )
 graph_dir=$1
 lang_dir=$2
@@ -41,21 +52,11 @@ mkdir -p $decode_dir/scoring/
   --word-symbol-table=$graph_dir/words.txt \
   exp/nnet3_chain/final.mdl \
   $graph_dir/HCLG.fst \
-  "ark,s,cs:apply-cmvn --norm-means=false --norm-vars=false --utt2spk=ark:$tshi3/utt2spk scp:$tshi3/cmvn.scp scp:$tshi3/feats.scp ark:- |" \
+  "ark,s,cs:apply-cmvn --norm-means=false --norm-vars=false --utt2spk=ark:${tshi3}_hires/utt2spk scp:${tshi3}_hires/cmvn.scp scp:${tshi3}_hires/feats.scp ark:- |" \
   "ark:|lattice-scale --acoustic-scale=10.0 ark:- ark:- | gzip -c > $decode_dir/lat1.1.gz" 2>&1 | tee $decode_dir/a.log
   # cat $decode_dir/a.log | grep ^0 > $decode_dir/scoring/7.0.0.txt
 )
 
-# (
-#   steps/nnet3/decode.sh --nj 1 --cmd "$decode_cmd" \
-#     --acwt 1.0 \
-#     --post_decode_acwt 10.0 \
-#     --skip_diagnostics true \
-#     --stage 3 \
-#     --scoring_opts '--min_lmwt 6 --max_lmwt 20' \
-#     --config conf/decode.config \
-#     $graph_dir $tshi3 $decode_dir
-# )
 lattice-lmrescore --lm-scale=-1.0 \
   "ark:gunzip -c $decode_dir/lat1.1.gz|" \
   "fstproject --project_output=true $lang_dir/G.fst |" \
@@ -76,4 +77,4 @@ lattice-scale --inv-acoustic-scale=13 "ark:gunzip -c $decode_dir/lat3.1.gz|" ark
 #   | tee $decode_dir/scoring/7.0.0.txt
 
 # cp $decode_dir/lat3.1.gz $decode_dir/lat.1.gz
-# steps/score_kaldi.sh $tshi3 $graph_dir $decode_dir
+# steps/score_kaldi.sh ${tshi3}_hires $graph_dir $decode_dir
