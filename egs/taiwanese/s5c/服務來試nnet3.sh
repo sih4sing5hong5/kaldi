@@ -56,7 +56,7 @@ mkdir -p $decode_dir/scoring/
   --beam=15.0 --lattice-beam=8.0 --acoustic-scale=1.0 \
   --allow-partial=true \
   --word-symbol-table=$graph_dir/words.txt \
-  ivector_opts \
+  $ivector_opts \
   $graph_dir/../final.mdl \
   $graph_dir/HCLG.fst \
   "ark,s,cs:apply-cmvn --norm-means=false --norm-vars=false --utt2spk=ark:${tshi3}_hires/utt2spk scp:${tshi3}_hires/cmvn.scp scp:${tshi3}_hires/feats.scp ark:- |" \
