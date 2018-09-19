@@ -14,15 +14,15 @@ tshi3=$3
 (
   utils/utt2spk_to_spk2utt.pl $tshi3/utt2spk > $tshi3/spk2utt
 
-  
+  utils/fix_data_dir.sh ${tshi3}
+
   mfccdir=${tshi3}_hires/mfcc
   make_mfcc_log=${tshi3}_hires/make_mfcc/
 
 
     utils/copy_data_dir.sh $tshi3 ${tshi3}_hires
   
-    utils/fix_data_dir.sh ${tshi3}_hires
-
+  
     steps/make_mfcc_pitch.sh --nj $nj --mfcc-config conf/mfcc_hires.conf \
       --cmd "$train_cmd" ${tshi3}_hires $make_mfcc_log $mfccdir
     steps/compute_cmvn_stats.sh ${tshi3}_hires $make_mfcc_log $mfccdir 
