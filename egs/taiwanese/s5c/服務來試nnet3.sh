@@ -3,7 +3,7 @@
 . cmd.sh
 . path.sh
 
-# 服務來試nnet3.sh decode_nnet3.sh exp/chain/tdnn_1a_sp/graph/ hethong/lang-3grams/ data/train_free/ exp/chain/tdnn_1a_sp/decode_tshi
+# 服務來試nnet3.sh decode_nnet3.sh exp/chain/tdnn_1a_sp/graph/ hethong/lang-3grams/ data/train_free exp/chain/tdnn_1a_sp/decode_tshi
 
 set -e # exit on error
 
@@ -14,7 +14,7 @@ tshi3=$3
   utils/fix_data_dir.sh $tshi3
 
   mfccdir=$tshi3/mfcc
-  make_mfcc_dir=$tshi3/make_mfcc/
+  make_mfcc_log=$tshi3/make_mfcc/
 
 
     utils/copy_data_dir.sh $tshi3 ${tshi3}_hires
