@@ -47,7 +47,7 @@ if [ $STAGE -le 10 ]; then
   dir=exp/chain/tdnn_1a_sp/
   graph_dir=$dir/graph
   $train_cmd $graph_dir/mkgraph.log \
-    utils/mkgraph.sh --self-loop-scale 1.0 data/lang_test $dir $graph_dir
+    utils/mkgraph.sh --self-loop-scale 1.0 $lang $dir $graph_dir
   steps/nnet3/decode.sh --acwt 1.0 --post-decode-acwt 10.0 \
       --nj $nj --cmd "$decode_cmd" \
       --online-ivector-dir exp/nnet3/ivectors_test \
