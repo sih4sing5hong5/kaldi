@@ -16,18 +16,11 @@
 
 set -e # exit on error
 
-#data=$1
-#model=$2
-#giap8=$3
-
 tshi3="$1"
 nj=1
 
 mfccdir=`pwd`/mfcc
 vaddir=`pwd`/mfcc
-data_root=/export/corpora5/LDC
-num_components=2048
-ivector_dim=128
 stage=0
 
 
