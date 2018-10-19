@@ -38,12 +38,14 @@ if [ $stage -le 1 ]; then
     $tshi3 exp/make_mfcc $mfccdir
   utils/fix_data_dir.sh $tshi3
 
-  compute_vad_decision.sh --nj $nj --cmd "$train_cmd" \
+  ../../callhome_diarization/v2/sid/compute_vad_decision.sh \
+    --nj $nj --cmd "$train_cmd" \
     $tshi3 exp/make_vad $vaddir
   utils/fix_data_dir.sh $tshi3
 
   echo "0.01" > $tshi3/frame_shift
-  vad_to_segments.sh --nj $nj --cmd "$train_cmd" \
+  ../../callhome_diarization/v2/diarization/vad_to_segments.sh \
+    --nj $nj --cmd "$train_cmd" \
     $tshi3 ${tshi3}_segmented
   # The sre dataset is a subset of train
 #  mkdir data/sre -p
