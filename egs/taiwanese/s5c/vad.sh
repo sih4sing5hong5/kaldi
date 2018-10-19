@@ -30,7 +30,7 @@ if [ $stage -le 1 ]; then
   # dataset, and used to estimate various quantities needed to perform
   # diarization on the other part (and vice versa).
   utils/fix_data_dir.sh $tshi3
-  cp ../../callhome_diarization/v1/conf/vad.conf conf/
+  cp ../../callhome_diarization/v2/conf/vad.conf conf/
 
   
   steps/make_mfcc.sh --mfcc-config conf/mfcc.conf --nj $nj \
