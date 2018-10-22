@@ -24,13 +24,16 @@ vaddir=`pwd`/mfcc
 stage=0
 
 
+if [ ! -f conf/vad.conf ]; then
+  cp ../../callhome_diarization/v2/conf/vad.conf conf/
+fi
+
 if [ $stage -le 1 ]; then
   # The script local/make_callhome.sh splits callhome into two parts, called
   # callhome1 and callhome2.  Each partition is treated like a held-out
   # dataset, and used to estimate various quantities needed to perform
   # diarization on the other part (and vice versa).
   utils/fix_data_dir.sh $tshi3
-  cp ../../callhome_diarization/v2/conf/vad.conf conf/
 
   
   steps/make_mfcc.sh --mfcc-config conf/mfcc.conf --nj $nj \
