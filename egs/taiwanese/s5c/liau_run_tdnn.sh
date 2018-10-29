@@ -6,25 +6,26 @@ set -e
 
 # configs for 'chain'
 affix=
-stage=0
+stage=1
+    --egs.opts "--frames-overlap-per-eg 0" \
 train_stage=-10
 get_egs_stage=-10
 dir=exp/chain/tdnn_1a  # Note: _sp will get added to this
 decode_iter=
 
 # training options
-num_epochs=4
+num_epochs=6
+frames_per_eg=150,110,90
 initial_effective_lrate=0.001
 final_effective_lrate=0.0001
 max_param_change=2.0
-final_layer_normalize_target=0.5
-num_jobs_initial=2
-num_jobs_final=12
+num_jobs_initial=3
+num_jobs_final=16
 minibatch_size=128
-frames_per_eg=150,110,90
 remove_egs=false
 common_egs_dir=
 xent_regularize=0.1
+dropout_schedule='0,0@0.20,0.5@0.50,0'
 
 # End configuration section.
 echo "$0 $@"  # Print the command line for logging
@@ -91,6 +92,11 @@ if [ $stage -le 10 ]; then
 
   num_targets=$(tree-info $treedir/tree |grep num-pdfs|awk '{print $2}')
   learning_rate_factor=$(echo "print 0.5/$xent_regularize" | python)
+  affine_opts="l2-regularize=0.01 dropout-proportion=0.0 dropout-per-dim=true dropout-per-dim-continuous=true"
+  tdnnf_opts="l2-regularize=0.01 dropout-proportion=0.0 bypass-scale=0.66"
+  linear_opts="l2-regularize=0.01 orthonormal-constraint=-1.0"
+  prefinal_opts="l2-regularize=0.01"
+  output_opts="l2-regularize=0.002"
 
   mkdir -p $dir/configs
   cat <<EOF > $dir/configs/network.xconfig
@@ -103,29 +109,28 @@ if [ $stage -le 10 ]; then
   fixed-affine-layer name=lda input=Append(-1,0,1,ReplaceIndex(ivector, t, 0)) affine-transform-file=$dir/configs/lda.mat
 
   # the first splicing is moved before the lda layer, so no splicing here
-  relu-batchnorm-layer name=tdnn1 dim=625
-  relu-batchnorm-layer name=tdnn2 input=Append(-1,0,1) dim=625
-  relu-batchnorm-layer name=tdnn3 input=Append(-1,0,1) dim=625
-  relu-batchnorm-layer name=tdnn4 input=Append(-3,0,3) dim=625
-  relu-batchnorm-layer name=tdnn5 input=Append(-3,0,3) dim=625
-  relu-batchnorm-layer name=tdnn6 input=Append(-3,0,3) dim=625
+  relu-batchnorm-dropout-layer name=tdnn1 $affine_opts dim=1536
+  tdnnf-layer name=tdnnf2 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=1
+  tdnnf-layer name=tdnnf3 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=1
+  tdnnf-layer name=tdnnf4 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=1
+  tdnnf-layer name=tdnnf5 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=0
+  tdnnf-layer name=tdnnf6 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  tdnnf-layer name=tdnnf7 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  tdnnf-layer name=tdnnf8 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  tdnnf-layer name=tdnnf9 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  tdnnf-layer name=tdnnf10 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  tdnnf-layer name=tdnnf11 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  tdnnf-layer name=tdnnf12 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  tdnnf-layer name=tdnnf13 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  tdnnf-layer name=tdnnf14 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  tdnnf-layer name=tdnnf15 $tdnnf_opts dim=1536 bottleneck-dim=160 time-stride=3
+  linear-component name=prefinal-l dim=256 $linear_opts
 
-  ## adding the layers for chain branch
-  relu-batchnorm-layer name=prefinal-chain input=tdnn6 dim=625 target-rms=0.5
-  output-layer name=output include-log-softmax=false dim=$num_targets max-change=1.5
+  prefinal-layer name=prefinal-chain input=prefinal-l $prefinal_opts big-dim=1536 small-dim=256
+  output-layer name=output include-log-softmax=false dim=$num_targets $output_opts
 
-  # adding the layers for xent branch
-  # This block prints the configs for a separate output that will be
-  # trained with a cross-entropy objective in the 'chain' models... this
-  # has the effect of regularizing the hidden parts of the model.  we use
-  # 0.5 / args.xent_regularize as the learning rate factor- the factor of
-  # 0.5 / args.xent_regularize is suitable as it means the xent
-  # final-layer learns at a rate independent of the regularization
-  # constant; and the 0.5 was tuned so as to make the relative progress
-  # similar in the xent and regular final layers.
-  relu-batchnorm-layer name=prefinal-xent input=tdnn6 dim=625 target-rms=0.5
-  output-layer name=output-xent dim=$num_targets learning-rate-factor=$learning_rate_factor max-change=1.5
-
+  prefinal-layer name=prefinal-xent input=prefinal-l $prefinal_opts big-dim=1536 small-dim=256
+  output-layer name=output-xent dim=$num_targets learning-rate-factor=$learning_rate_factor $output_opts
 EOF
   steps/nnet3/xconfig_to_configs.py --xconfig-file $dir/configs/network.xconfig --config-dir $dir/configs/
 fi
@@ -142,12 +147,14 @@ if [ $stage -le 11 ]; then
     --feat.cmvn-opts "--norm-means=false --norm-vars=false" \
     --chain.xent-regularize $xent_regularize \
     --chain.leaky-hmm-coefficient 0.1 \
-    --chain.l2-regularize 0.00005 \
+    --chain.l2-regularize 0.0 \
     --chain.apply-deriv-weights false \
     --chain.lm-opts="--num-extra-lm-states=2000" \
+    --trainer.dropout-schedule $dropout_schedule \
+    --trainer.add-option="--optimization.memory-compression-level=2" \
     --egs.dir "$common_egs_dir" \
     --egs.stage $get_egs_stage \
-    --egs.opts "--frames-overlap-per-eg 0" \
+    --egs.opts "--frames-overlap-per-eg 0 --constrained false" \
     --egs.chunk-width $frames_per_eg \
     --trainer.num-chunk-per-minibatch $minibatch_size \
     --trainer.frames-per-iter 1500000 \
