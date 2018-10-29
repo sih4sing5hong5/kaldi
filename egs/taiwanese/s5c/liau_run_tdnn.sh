@@ -6,8 +6,7 @@ set -e
 
 # configs for 'chain'
 affix=
-stage=1
-    --egs.opts "--frames-overlap-per-eg 0" \
+stage=0
 train_stage=-10
 get_egs_stage=-10
 dir=exp/chain/tdnn_1a  # Note: _sp will get added to this
@@ -16,12 +15,12 @@ decode_iter=
 # training options
 num_epochs=6
 frames_per_eg=150,110,90
-initial_effective_lrate=0.001
-final_effective_lrate=0.0001
+initial_effective_lrate=0.00025
+final_effective_lrate=0.000025
 max_param_change=2.0
 num_jobs_initial=3
 num_jobs_final=16
-minibatch_size=128
+minibatch_size=64
 remove_egs=false
 common_egs_dir=
 xent_regularize=0.1
